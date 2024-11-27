@@ -13,7 +13,7 @@ const LoginPage = () => {
   return (
     <div className="flex min-h-screen relative">
       {/* Logo Orange */}
-      <a href="/"> {/* Ganti "/landingpage" dengan URL tujuan Anda */}
+      <a href="/">
         <img
           src={LogoOrange}
           alt="Logo"
@@ -92,19 +92,28 @@ const LoginPage = () => {
               Remember me
             </label>
           </div>
-        </form>
 
-        {/* Tombol Masuk */}
-        <button
-          className="mt-11 bg-[#FFA726] px-6 py-2 text-white rounded-md text-center flex items-center justify-center text-center"
-          style={{
-            fontSize: '13px',
-            fontWeight: 'bold',
-            padding: '10px 48px',
-          }}
-        >
-          Masuk
-        </button>
+          {/* Tombol Masuk - Bungkus dengan div untuk tengah dan margin */}
+            <div
+              className="mt-8 flex justify-center"
+              style={{
+                paddingTop: '24px', // Gunakan paddingTop dengan huruf kapital
+              }}
+            >
+              <button
+                className="bg-[#FFA726] px-6 py-2 text-white rounded-md text-center flex items-center justify-center text-center"
+                style={{
+                  fontSize: '13px',
+                  fontWeight: 'bold',
+                  padding: '12px 48px',
+                }}
+                onClick={() => navigate('/dashboard')} 
+              >
+                Masuk
+              </button>
+            </div>
+
+        </form>
 
         {/* Pendaftaran Akun */}
         <p className="mt-4 text-[#000000] text-center" style={{ fontSize: '9px', fontWeight: '300' }}>

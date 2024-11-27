@@ -1,0 +1,83 @@
+[
+    {
+      "id": 1,
+      "title": "Kalkulus",
+      "image": "Kalkulus.png",
+      "rating": 4.7,
+      "price": "45.000",
+      "instructor": "Lorem Ipsum"
+    },
+    {
+      "id": 2,
+      "title": "Algoritma Pemrograman",
+      "image": "Alpro.png",
+      "rating": 4.9,
+      "price": "40.000",
+      "instructor": "Lorem Ipsum"
+    },
+    {
+      "id": 3,
+      "title": "Teori Peluang",
+      "image": "TeoriPeluang.png",
+      "rating": 5.0,
+      "price": "45.000",
+      "instructor": "Lorem Ipsum"
+    },
+    {
+      "id": 4,
+      "title": "Basis Data",
+      "image": "BasisData.png",
+      "rating": 4.8,
+      "price": "50.000",
+      "instructor": "John Doe"
+    },
+    {
+      "id": 5,
+      "title": "Pemrograman Web",
+      "image": "PemrogramanWeb.png",
+      "rating": 4.5,
+      "price": "55.000",
+      "instructor": "Jane Smith"
+    },
+    {
+      "id": 6,
+      "title": "Sistem Operasi",
+      "image": "SistemOperasi.png",
+      "rating": 4.6,
+      "price": "48.000",
+      "instructor": "Robert Brown"
+    },
+    {
+      "id": 7,
+      "title": "Jaringan Komputer",
+      "image": "JaringanKomputer.png",
+      "rating": 4.4,
+      "price": "40.000",
+      "instructor": "Alice Johnson"
+    },
+    {
+      "id": 8,
+      "title": "Kecerdasan Buatan",
+      "image": "KecerdasanBuatan.png",
+      "rating": 4.9,
+      "price": "60.000",
+      "instructor": "Chris Lee"
+    },
+    {
+      "id": 9,
+      "title": "Matematika Diskrit",
+      "image": "MatematikaDiskrit.png",
+      "rating": 4.3,
+      "price": "38.000",
+      "instructor": "Daniel Wilson"
+    },
+    {
+      "id": 10,
+      "title": "Rekayasa Perangkat Lunak",
+      "image": "RekayasaPerangkatLunak.png",
+      "rating": 5.0,
+      "price": "70.000",
+      "instructor": "Emily Davis"
+    }
+  ]
+  

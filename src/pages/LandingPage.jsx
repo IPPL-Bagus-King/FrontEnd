@@ -412,8 +412,8 @@ const LandingPage = () => {
                   key={index}
                   className={`w-3 h-3 rounded-full ${
                     index === Math.floor(currentIndex / 3)
-                      ? "bg-gray-300"
-                      : "bg-[#ffffff]"
+                      ? "bg-[#FFFFFF]"
+                      : "bg-[#ffd79b]"
                   }`}
                 ></div>
               )

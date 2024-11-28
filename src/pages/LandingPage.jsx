@@ -12,21 +12,98 @@ import Logo3 from '../assets/FeatureSection3.png';
 import Logo4 from '../assets/FeatureSection4.png';
 import Mail from '../assets/mail.png';
 import Instagram from '../assets/instagram.png';
+import ItemNotFound from '../assets/ItemNotFound.png';
 import PrevVector from '../assets/buttonPrevVector.svg';
 import NextVector from '../assets/buttonNextVector.svg';
 import Search from '../assets/search.png';
 import Filter from '../assets/filter.png';
-import Kalkulus from '../assets/Kalkulus.png';
-import AlgoritmaPemrograman from '../assets/Alpro.png';
-import TeoriPeluang from '../assets/TeoriPeluang.png';
 import Join from '../assets/JoinButton.png';
-import People1 from '../assets/People1.png';
-import People2 from '../assets/People2.png';
-import People3 from '../assets/People3.png';
 
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 const LandingPage = () => {
-  const navigate = useNavigate();
+  const [reviews, setReview] = useState([]);
+  const [forums, setForum] = useState([]);
 
+  const fetchData = async () => {
+    try {
+      const [reviewResponse, forumResponse] = await Promise.all([
+        fetch(`${BASE_URL}/review`),
+        fetch(`${BASE_URL}/forum`),
+      ]);
+
+      // Periksa apakah response berhasil
+      if (!reviewResponse.ok) {
+        throw new Error(`Failed to fetch reviews: ${reviewResponse.statusText}`);
+      }
+      if (!forumResponse.ok) {
+        throw new Error(`Failed to fetch forums: ${forumResponse.statusText}`);
+      }
+
+      const reviewData = await reviewResponse.json();
+      const forumData = await forumResponse.json();
+
+      const reviewsData = await Promise.all(
+        reviewData.data.slice(0, 9).map(async ({ user_id, comment }) => {
+          try {
+            const userResponse = await fetch(`${BASE_URL}/users/${user_id}`);
+            if (!userResponse.ok) {
+              throw new Error(`Failed to fetch user with id ${user_id}`);
+            }
+            const userData = await userResponse.json();
+            const { username, picture } = userData.data;
+
+            return { comment, username, picture };
+          } catch (error) {
+            console.error(`Error fetching user ${user_id}:`, error);
+            return { comment };
+          }
+        })
+      );
+
+      setReview(reviewsData);
+
+      const forumsData = await Promise.all(
+        forumData.data.map(async ({ id, name, description, price, picture, teacher_id }) => {
+          try {
+            const teacherResponse = await fetch(`${BASE_URL}/users/${teacher_id}`);
+            if (!teacherResponse.ok) {
+              throw new Error(`Failed to fetch teacher with id ${teacher_id}`);
+            }
+            const teacherData = await teacherResponse.json();
+            const { username, picture: teacherPicture } = teacherData.data;
+
+            const ratingResponse = await fetch(`${BASE_URL}/review/${id}`);
+            const ratingData = await ratingResponse.json();
+            const rating = ratingData.averageRating;
+
+            return {
+              id,
+              name,
+              description,
+              price,
+              picture,
+              teacher_name: username,
+              teacher_picture: teacherPicture,
+              rating,
+            };
+          } catch (error) {
+            console.error(`Error fetching teacher ${teacher_id}:`, error);
+            return { name, description, price, picture };
+          }
+        })
+      );
+
+      setForum(forumsData);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const navigate = useNavigate();
   const features = [
     {
       img: Logo1,
@@ -94,75 +171,64 @@ const LandingPage = () => {
     visible: { opacity: 1, x: 0, transition: { duration: 0.5, delay: 0.2, ease: 'easeOut' } },
   };
 
-  const testimonials = [
-    { name: "Emily Davis", review: "Tutor.in has been a game-changer!  The tutors are incredibly knowledgeable and patient. I've made huge strides in my studies, thanks to their guidance. Highly recommended! ⭐ ⭐ ⭐ ⭐ ⭐", image: People1 },
-    { name: "Michael Chen", review: "I was struggling with calculus until I found Tutor.in. ➗ The interactive lessons and practice problems have made all the difference. I'm so glad I discovered this platform!", image: People2 },
-    { name: "Olivia Rodriguez", review: "Tutor.in is the perfect place to learn at your own pace.  The flexibility is amazing, and the tutors are always available to answer questions. I've learned so much!", image: People3 },
-    { name: "Daniel Lee", review: "I've tried other online tutoring platforms, but Tutor.in is by far the best.  The tutors are not only experts in their subjects but also great at explaining things in a way that's easy to understand.", image: People2 },
-    { name: "Sophia Patel", review: "I was nervous about taking an online course, but Tutor.in made the transition seamless.  The platform is user-friendly, and the community is supportive. I've made some great friends while learning new skills.", image: People3 },
-    { name: "Ethan Kim", review: "Tutor.in has helped me improve my writing skills tremendously.  The feedback from the tutors is invaluable, and I've become a much more confident writer. ", image: People1 },
-    { name: "Ava Wilson", review: "I was looking for a way to brush up on my Spanish, and Tutor.in was the perfect solution. 🇪🇸 The native-speaking tutors are amazing, and I've made rapid progress. ¡Gracias!", image: People3 },
-    { name: "Benjamin Hall", review: "Tutor.in has been a lifesaver! 🆘 I was struggling to keep up with my coursework, but with the help of a tutor, I'm back on track. I'm so grateful for this resource. ", image: People1 },
-    { name: "Charlotte Wright", review: "If you're looking for personalized learning, Tutor.in is the way to go.  The tutors are able to identify your strengths and weaknesses and tailor the lessons accordingly. I'm really impressed with this platform.", image: People2 },
-  ];
+  const gridVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.2, delayChildren: 0.1  },
+    },
+  };
+
+  const dividerVariants = {
+    initial: {
+      scaleY: 0,
+    },
+    animate: {
+      scaleY: 1,
+      transition: {
+        duration: 0.5,
+        ease: "easeInOut",
+      },
+    },
+  };
 
   useEffect(() => {
-    // Set interval untuk mengganti index setiap 7 detik
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => {
-        return prevIndex + 3 >= testimonials.length ? 0 : prevIndex + 3;
-      });
-    }, 7000); // Bergeser setiap 7 detik
-  
-    return () => clearInterval(interval);
-  }, []);
+    if (reviews.length > 0) {
+      const interval = setInterval(() => {
+        setCurrentIndex((prevIndex) =>
+          prevIndex + 3 >= reviews.length ? 0 : prevIndex + 3
+        );
+      }, 7000); // Bergeser setiap 7 detik
+    
+      return () => clearInterval(interval); // Hapus interval saat komponen unmount
+    }
+  }, [reviews]); 
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const handlePrev = () => {
     setCurrentIndex((prevIndex) =>
-      prevIndex === 0 ? testimonials.length - 3 : prevIndex - 3
-    );
-  };
-
-  const handleNext = () => {
-    setCurrentIndex((prevIndex) =>
-      prevIndex + 3 >= testimonials.length ? 0 : prevIndex + 3
+      prevIndex === 0 ? Math.max(0, reviews.length - 3) : prevIndex - 3
     );
   };
   
-  // Buat forum belajar
-  const courses = [
-    {
-      title: "Kalkulus",
-      image: Kalkulus,
-      rating: 4.7,
-      price: "45.000",
-      instructor: "Lorem Ipsum",
-    },
-    {
-      title: "Algoritma Pemrograman",
-      image: AlgoritmaPemrograman,
-      rating: 4.9,
-      price: "40.000",
-      instructor: "Lorem Ipsum",
-    },
-    {
-      title: "Teori Peluang",
-      image: TeoriPeluang,
-      rating: 5.0,
-      price: "45.000",
-      instructor: "Lorem Ipsum",
-    },
-  ];
+  const handleNext = () => {
+    setCurrentIndex((prevIndex) =>
+      prevIndex + 3 >= reviews.length ? 0 : prevIndex + 3
+    );
+  };
+  
+  useEffect(() => {
+    setFilteredCourses(forums);
+  }, [forums]);
 
-  const [filteredCourses, setFilteredCourses] = useState(courses);
+  const [filteredCourses, setFilteredCourses] = useState(forums);
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
-    const filtered = courses.filter((course) =>
-      course.title.toLowerCase().includes(event.target.value.toLowerCase())
+    const filtered = forums.filter((course) =>
+      course.name.toLowerCase().includes(event.target.value.toLowerCase())
     );
     setFilteredCourses(filtered);
   };
@@ -192,11 +258,15 @@ const LandingPage = () => {
         >
           Daftar
         </motion.button>
-        <motion.div 
-          className="w-px h-8 bg-white"
-          variants={navVariants}
-        >
-        </motion.div>
+
+        <motion.div
+          className="w-px h-12 bg-white origin-top"
+          initial="initial"
+          animate="animate"
+          variants={dividerVariants}
+        ></motion.div>
+
+        
         <motion.button
           onClick={() => navigate('/login')}
           className="border border-white text-white font-bold px-6 py-2 rounded-full hover:bg-white hover:text-[#FFA726] transition-all"
@@ -238,7 +308,7 @@ const LandingPage = () => {
         <motion.div className="flex justify-start" variants={itemVariants}>
           <button
             onClick={() => navigate("/register")}
-            className="relative group overflow-hidden bg-[#FFA726] text-white font-semibold px-16 py-3 rounded-md shadow-md focus:outline-none"
+            className="relative group overflow-hidden bg-[#FFA726] text-white font-semibold px-16 py-3 rounded-md shadow-md focus:outline-none hover:shadow-[0px_24px_37px_rgba(255,167,38,0.32)]"
           >
             <span
               className="absolute inset-0 bg-white transform -translate-x-full transition-transform duration-500 ease-in-out group-hover:translate-x-0"
@@ -366,7 +436,7 @@ const LandingPage = () => {
               transition={{ duration: 1, ease: "easeOut" }}  // Transisi untuk animasi bergeser
               style={{ overflow: "hidden" }}  // Menjaga overflow saat transisi                     
             >
-              {testimonials.slice(currentIndex, currentIndex + 3).map((testimonial, index) => (
+              {reviews.length > 0 && reviews.slice(currentIndex, currentIndex + 3).map((testimonial, index) => (
                 <motion.div
                   key={index}
                   className="bg-[#ffffff] p-6 shadow-md text-center border border-gray-300"
@@ -381,12 +451,12 @@ const LandingPage = () => {
                   transition={{ duration: 0.5 }}    // Durasi transisi            
                 >
                   <img
-                    src={testimonial.image}
-                    alt={testimonial.name}
+                    src={`${BASE_URL}/${testimonial.picture}`}
+                    alt={testimonial.username}
                     className="w-16 h-16 mx-auto mb-4 rounded-full"
                   />
-                  <h3 className="font-bold text-xl text-[#ffa726]">{testimonial.name}</h3>
-                  <p className="text-gray-600">{testimonial.review}</p>
+                  <h3 className="font-bold text-xl text-[#ffa726]">{testimonial.username}</h3>
+                  <p className="text-gray-600">{testimonial.comment}</p>
                 </motion.div>
               ))}
             </motion.div>
@@ -406,7 +476,7 @@ const LandingPage = () => {
 
           {/* Indikator */}
           <div className="mt-6 flex justify-center space-x-2">
-            {Array.from({ length: Math.ceil(testimonials.length / 3) }).map(
+            {Array.from({ length: Math.ceil(reviews.length / 3) }).map(
               (_, index) => (
                 <div
                   key={index}
@@ -450,40 +520,86 @@ const LandingPage = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {filteredCourses.length === 0 ? (
+        // Jika filteredCourses kosong
+        <div className="flex justify-center items-center h-96">
+          <motion.img
+            src={ItemNotFound} 
+            alt="Data Not Found"
+            className="w-72"
+            initial="hidden"
+            animate="visible"
+            variants={navVariants}
+          />
+        </div>
+      ) : (
+        // Jika ada data di filteredCourses
+        <motion.div
+          key={`grid-${filteredCourses.length}`}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          initial="hidden"
+          animate="visible"
+          variants={gridVariants}
+        >
           {filteredCourses.map((course, index) => (
-            <div
+            <motion.div
               key={index}
-              className="border border-gray-200 rounded-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-in-out p-4 flex flex-col"
-              style={{ aspectRatio: '6/5' }}  // Membuat card lebih kotak
+              className="border border-gray-200 rounded-lg shadow-xl p-4 flex flex-col"
+              style={{ aspectRatio: "6/5" }}
+              variants={{
+                hidden: { opacity: 0, y: 30 },
+                visible: { opacity: 1, y: 0 },
+              }}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{
+                duration: 0.6,
+              }}
+              whileHover={{
+                scale: 1.05,
+                boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.15)",
+                transition: {
+                  duration: 0.2,
+                  ease: "easeInOut",
+                  rest: { duration: 0.15 },
+                },
+              }}
             >
               <img
-                src={course.image}
-                alt={course.title}
-                className="w-full h-40 object-cover rounded-lg mb-4 transform transition-all duration-500 ease-in-out"
+                src={`${BASE_URL}/${course.picture}`}
+                alt={course.name}
+                className="w-full h-40 object-cover rounded-lg mb-4"
               />
               <div className="flex justify-between items-center mb-2">
-                <h2 className="text-2xl font-semibold text-gray-800">{course.title}</h2>
-                <p className="text-yellow-500 text-sm text-lg">{course.rating} ⭐</p> 
+                <h2 className="text-2xl font-semibold text-gray-800">{course.name}</h2>
+                <p className="text-yellow-500 text-lg">{course.rating} ⭐</p>
               </div>
-              <p className="text-md mb-2">Rp {course.price} / meet</p>
+              <p className="text-md mb-2">
+                Rp {parseInt(course.price, 10).toLocaleString("id-ID")} / Meet
+              </p>
               <div className="flex justify-between items-center mt-auto">
                 <p className="text-gray-600 text-md flex items-center">
-                  <img src={People1} alt="Instructor photo" className="w-9 mr-2" />
-                  {course.instructor}
+                  <img
+                    src={`${BASE_URL}/${course.teacher_picture}`}
+                    alt="Instructor photo"
+                    className="w-9 mr-2"
+                  />
+                  {course.teacher_name}
                 </p>
-                <img 
-                  src={Join} 
-                  alt="Join Button" 
-                  onClick={
-                    () => navigate('/register')
-                  }
-                  className="w-20 mr-3 mb-3 transition-all duration-300 transform hover:scale-105 cursor-pointer" 
+                <motion.img
+                  src={Join}
+                  alt="Join Button"
+                  onClick={() => navigate("/register")}
+                  className="w-20 mr-3 mb-3 cursor-pointer"
+                  whileHover={{ scale: 1.07 }}
                 />
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
+      )}
+
       </section>
       
       {/* Footer */}

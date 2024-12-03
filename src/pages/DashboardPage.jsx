@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom'; // Untuk navigasi
 import LogoOrange from '../assets/logo-Orange.png'; // Logo utama
 import ProfileLogo from '../assets/ProfileLogo.png'; // Gambar Profile
@@ -10,10 +10,20 @@ import ForumSayaInactive from '../assets/ForumSaya-Inactive.png'; // Logo Forum 
 import ForumSayaAktif from '../assets/ForumSaya-Active.png'; // Logo Forum Saya Aktif
 import TransaksiAktif from '../assets/Transaksi-Active.png'; // Logo Transaksi Aktif
 import TransaksiInactive from '../assets/Transaksi-Inactive.png'; // Logo Transaksi Inaktif
+import { AuthContext } from '../context/AuthContext';
 
 const DashboardPage = () => {
   const [activeMenu, setActiveMenu] = useState('forumBelajar'); // Default menu: Forum Belajar
+  const { user, setIsAuthenticated } = useContext(AuthContext);
   const navigate = useNavigate(); // Untuk navigasi halaman
+
+  const handleLogout = () => {
+    localStorage.removeItem('token'); // Hapus token
+    sessionStorage.removeItem('token');
+    setIsAuthenticated(false); // Update status login
+    setUser(null);
+    navigate('/'); // Redirect ke login
+  };
 
   // Menentukan konten berdasarkan menu aktif
   const renderRightSectionContent = () => {
@@ -53,9 +63,9 @@ const DashboardPage = () => {
 
         {/* Profile */}
         <div className="flex flex-col items-center space-y-2">
-          <img src={ProfileLogo} alt="Profile" className="w-14 h-14 rounded-full" />
-          <h2 className="text-lg font-semibold text-center">Name</h2>
-          <p className="text-gray-500 text-sm text-center">User Role</p>
+          <img src={user.picture} alt="Profile" className="w-14 h-14 rounded-full" />
+          <h2 className="text-lg font-semibold text-center">{user.name}</h2>
+          <p className="text-gray-500 text-sm text-center">{user.role}</p>
         </div>
 
         {/* Menu */}
@@ -106,7 +116,7 @@ const DashboardPage = () => {
         {/* Sign Out */}
         <button
           className="w-full flex justify-center py-2 mt-auto rounded-lg"
-          onClick={() => navigate('/')} // Navigasi ke landing page
+          onClick={handleLogout} // Navigasi ke landing page
         >
           <img src={SignOutIcon} alt="Sign Out" className="w-[35%] h-auto" />
         </button>

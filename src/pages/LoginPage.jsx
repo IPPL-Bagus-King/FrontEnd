@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { jwtDecode } from "jwt-decode";
 
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 const LoginPage = () => {
   // State untuk menangani tombol yang aktif
   const [isMentor, setIsMentor] = useState(true);  // default is Mentor
@@ -22,7 +23,7 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:3000/auth/login/', {
+      const response = await fetch(`${BASE_URL}/auth/login/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

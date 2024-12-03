@@ -12,6 +12,7 @@ import TransaksiAktif from '../assets/Transaksi-Active.png'; // Logo Transaksi A
 import TransaksiInactive from '../assets/Transaksi-Inactive.png'; // Logo Transaksi Inaktif
 import { AuthContext } from '../context/AuthContext';
 
+const BASE_URL = import.meta.env.VITE_BASE_URL;
 const DashboardPage = () => {
   const [activeMenu, setActiveMenu] = useState('forumBelajar'); // Default menu: Forum Belajar
   const { user, setIsAuthenticated } = useContext(AuthContext);
@@ -63,7 +64,7 @@ const DashboardPage = () => {
 
         {/* Profile */}
         <div className="flex flex-col items-center space-y-2">
-          <img src={user.picture} alt="Profile" className="w-14 h-14 rounded-full" />
+          <img src={`${BASE_URL}/${user.picture}`} alt="Profile" className="w-14 h-14 rounded-full" />
           <h2 className="text-lg font-semibold text-center">{user.name}</h2>
           <p className="text-gray-500 text-sm text-center">{user.role}</p>
         </div>

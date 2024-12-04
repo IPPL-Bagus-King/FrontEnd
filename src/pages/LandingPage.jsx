@@ -219,7 +219,9 @@ const LandingPage = () => {
   };
   
   useEffect(() => {
-    setFilteredCourses(forums);
+    if (forums && forums.length > 0) {
+      setFilteredCourses(forums);
+    }
   }, [forums]);
 
   const [filteredCourses, setFilteredCourses] = useState(forums);
@@ -258,7 +260,7 @@ const LandingPage = () => {
         >
           Daftar
         </motion.button>
-
+    
         <motion.div
           className="w-px h-12 bg-white origin-top"
           initial="initial"
@@ -332,7 +334,7 @@ const LandingPage = () => {
         <img
           src={PeopleImage}
           alt="People"
-          className="relative z-10 max-w-xs md:max-w-md lg:max-w-lg transform -translate-x-16 scale-110 mr-12 mb-12"
+          className="relative z- max-w-xs md:max-w-md lg:max-w-lg transform -translate-x-16 scale-110 mr-12 mb-12"
         />
       </div>
     </div>
@@ -552,7 +554,6 @@ const LandingPage = () => {
               }}
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
               transition={{
                 duration: 0.6,
               }}
@@ -570,6 +571,7 @@ const LandingPage = () => {
                 src={`${BASE_URL}/${course.picture}`}
                 alt={course.name}
                 className="w-full h-40 object-cover rounded-lg mb-4"
+                loading="lazy"
               />
               <div className="flex justify-between items-center mb-2">
                 <h2 className="text-2xl font-semibold text-gray-800">{course.name}</h2>

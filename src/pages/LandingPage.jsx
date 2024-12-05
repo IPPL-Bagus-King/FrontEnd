@@ -325,7 +325,7 @@ const LandingPage = () => {
       </motion.div>
 
       {/* Right Section */}
-      <div className="w-3/5 relative flex items-center justify-center">
+      <div className="w-3/5 pt-10 relative flex items-center justify-center">
         <img
           src={WaveBG}
           alt="Wave Background"

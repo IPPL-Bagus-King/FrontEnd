@@ -563,7 +563,7 @@ const LandingPage = () => {
                 transition: {
                   duration: 0.2,
                   ease: "easeInOut",
-                  rest: { duration: 0.15 },
+                  rest: { duration: 0.1 },
                 },
               }}
             >

@@ -26,7 +26,7 @@ const DashboardPage = () => {
   const [forums, setForum] = useState([]);
   const [historyCheckout, setHistoryCheckout] = useState([]);
   const [forumsHistory, setForumsHistory] = useState([]);
-
+  
   // Fetch data 
   const fetchForums = async () => {
     const response = await fetch(`${BASE_URL}/forum`);

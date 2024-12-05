@@ -14,7 +14,16 @@ import TransaksiAktif from '../assets/Transaksi-Active.png'; // Logo Transaksi A
 import TransaksiInactive from '../assets/Transaksi-Inactive.png'; // Logo Transaksi Inaktif
 import KelolaMentorAktif from '../assets/KelolaMentor-Active.png'; // Logo KelolaMentor Aktif
 import KelolaMentorInactive from '../assets/KelolaMentor-Inactive.png'; // Logo KelolaMentor Inaktif
+import LogoAdd from '../assets/LogoAdd.png';
+import { motion } from 'framer-motion';
 import { AuthContext } from '../context/AuthContext';
+import { 
+  fetchForums, 
+  fetchTeacher, 
+  fetchRating,
+  approveTeacher, 
+  rejectTeacher, 
+} from '../services/apiService';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const DashboardPage = () => {
@@ -27,24 +36,7 @@ const DashboardPage = () => {
   const [historyCheckout, setHistoryCheckout] = useState([]);
   const [forumsHistory, setForumsHistory] = useState([]);
 
-  // Fetch data 
-  const fetchForums = async () => {
-    const response = await fetch(`${BASE_URL}/forum`);
-    if (!response.ok) throw new Error(`Failed to fetch forums: ${response.statusText}`);
-    return response.json();
-  };
-
-  const fetchTeacher = async (teacherId) => {
-    const response = await fetch(`${BASE_URL}/users/${teacherId}`);
-    if (!response.ok) throw new Error(`Failed to fetch teacher with id ${teacherId}`);
-    return response.json();
-  };
-
-  const fetchRating = async (forumId) => {
-    const response = await fetch(`${BASE_URL}/review/${forumId}`);
-    return response.json();
-  };
-
+  // Fetch history checkout
   const fetchHistoryCheckout = async () => {
     try {
       const response = await fetch(`${BASE_URL}/checkout/history`, {
@@ -175,7 +167,7 @@ const DashboardPage = () => {
     };
     fetchAllData();
   }, []);
-
+ 
   const handleLogout = () => {
     localStorage.removeItem('token'); // Hapus token
     sessionStorage.removeItem('token');
@@ -212,24 +204,12 @@ const DashboardPage = () => {
 
 const handleApprove = async (teacherId) => {
   try {
-    const response = await fetch(`${BASE_URL}/admin/pending-teacher/${teacherId}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-      body: JSON.stringify({ action: 'approve' }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to approve teacher');
-    }
-
-     // Perbarui state untuk menghapus teacher yang sudah disetujui
-     setPendingTeachers((prev) => ({
-      ...prev,
-      data: prev.data.filter((teacher) => teacher.id !== teacherId),
-    }));
+    await approveTeacher(teacherId, localStorage.getItem('token'));
+    // Perbarui state untuk menghapus teacher yang sudah disetujui
+    setPendingTeachers((prev) => ({
+    ...prev,
+    data: prev.data.filter((teacher) => teacher.id !== teacherId),
+  }));
   } catch (error) {
     console.error('Error approving teacher:', error);
   }
@@ -237,19 +217,7 @@ const handleApprove = async (teacherId) => {
 
 const handleReject = async (teacherId) => {
   try {
-    const response = await fetch(`${BASE_URL}/admin/pending-teacher/${teacherId}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('token')}`,
-      },
-      body: JSON.stringify({ action: 'reject' }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to reject teacher');
-    }
-
+    await rejectTeacher(teacherId, localStorage.getItem('token'));
     // Update state untuk menghapus teacher yang ditolak
     setPendingTeachers((prev) => ({
       ...prev,
@@ -277,7 +245,17 @@ const handleReject = async (teacherId) => {
             {forumsHistory.map((forum) => (
               <MyForum key={forum.id} forum={forum} />
             ))}
+            <div className="flex justify-between items-center mt-auto">
+              <motion.img
+                        src={LogoAdd}
+                        alt="Add Button"
+                        onClick={() => navigate("/tambah-forum")}
+                        className="w-20 mr-3 mb-3 cursor-pointer absolute bottom-10 right-10"
+                        whileHover={{ scale: 1.07 }}
+                      />
+            </div>
           </div>
+          
           );
       case 'transaksi':
         return (
@@ -424,6 +402,7 @@ const handleReject = async (teacherId) => {
 
         {/* Render Konten berdasarkan Menu */}
         {renderRightSectionContent()}
+        
       </div>
     </div>
   );

@@ -17,10 +17,7 @@ const Forum = ({ forum }) => {
   const handlePurchase = async (e) => {
     e.preventDefault();
     setModalContent(
-      `Are you sure you want to purchase the course "${forum.name}" for Rp ${parseInt(
-        forum.price,
-        10
-      ).toLocaleString("id-ID")} with ${bank}?`
+      `Are you sure you want to purchase the course "${forum.name}" for Rp ${parseFloat(forum.price).toLocaleString("id-ID", {minimumFractionDigits: 2, maximumFractionDigits: 2})} with ${bank}?`
     );
     setIsModalOpen(true);
   };
@@ -101,7 +98,7 @@ const Forum = ({ forum }) => {
           <h2 className="course-title">{forum.name}</h2>
           <p className="text-yellow-500 text-sm text-lg">{forum.rating} ⭐</p>
         </div>
-        <p className="text-md mb-2">Rp {forum.price} / meet</p>
+        <p className="text-md mb-2">Rp {parseFloat(forum.price).toLocaleString("id-ID", {minimumFractionDigits: 2, maximumFractionDigits: 2})} / meet</p>
         <div className="flex justify-between items-center mt-auto">
           <p className="text-gray-600 text-md flex items-center">
             <img src={`${BASE_URL}/${forum.teacher_picture}`} alt="Instructor photo" className="w-9 mr-2" />
@@ -141,7 +138,7 @@ const Forum = ({ forum }) => {
                     <span className="font-medium">Description:</span> {forum.description}
                   </p>
                   <p className="text-gray-700">
-                    <span className="font-medium">Price:</span> Rp {parseInt(forum.price, 10).toLocaleString("id-ID")} / Meet
+                    <span className="font-medium">Price:</span> Rp {parseFloat(forum.price).toLocaleString("id-ID", {minimumFractionDigits: 2, maximumFractionDigits: 2})} / Meet
                   </p>
                   <p className="text-gray-700">
                     <span className="font-medium">Rating:</span> {forum.rating} ⭐
@@ -174,7 +171,7 @@ const Forum = ({ forum }) => {
                       <span className="font-medium">Status:</span> {popupData.status}
                     </p>
                     <p>
-                      <span className="font-medium">Price:</span> Rp {parseInt(forum.price, 10).toLocaleString("id-ID")} / Meet
+                      <span className="font-medium">Price:</span> Rp {parseFloat(forum.price).toLocaleString("id-ID", {minimumFractionDigits: 2, maximumFractionDigits: 2})} / Meet
                     </p>
                     <p>
                       <span className="font-medium">Bank:</span> {popupData.bank}
@@ -186,7 +183,7 @@ const Forum = ({ forum }) => {
                   </div>
                 </div>
                 <button
-                  onClick={() => alert('Join Button Clicked')} // Replace with your function to handle payment
+                  onClick={() => {window.location.reload()}} // Replace with your function to handle payment
                   className="w-full bg-yellow-600 text-white font-medium py-3 rounded-lg shadow hover:bg-yellow-700 transition duration-300"
                 >
                   Complete Payment
@@ -210,7 +207,7 @@ const Forum = ({ forum }) => {
                 </p>
                 <p className="text-gray-700">
                   <span className="font-medium">Price:</span> Rp{" "}
-                  {parseInt(forum.price, 10).toLocaleString("id-ID")}
+                  {parseFloat(forum.price).toLocaleString("id-ID", {minimumFractionDigits: 2, maximumFractionDigits: 2})}
                 </p>
               </div>
               <form onSubmit={handlePurchase} className="space-y-4">
@@ -231,9 +228,7 @@ const Forum = ({ forum }) => {
                     <option value="BCA">BCA</option>
                     <option value="BRI">BRI</option>
                     <option value="BNI">BNI</option>
-                    <option value="Permata Bank">Permata Bank</option>
                     <option value="CIMB">CIMB</option>
-                    <option value="Danamon">Danamon</option>
                   </select>
                 </div>
                 <button

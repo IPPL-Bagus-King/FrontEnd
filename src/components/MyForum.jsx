@@ -11,7 +11,7 @@ const Forum = ({ forum }) => {
         <h2 className="course-title">{forum.name}</h2>
         <p className="text-yellow-500 text-sm text-lg">{forum.rating} ⭐</p>
       </div>
-      <p className="text-md mb-2">Rp {forum.price} / meet</p>
+      <p className="text-md mb-2">Rp {parseFloat(forum.price).toLocaleString("id-ID", {minimumFractionDigits: 2, maximumFractionDigits: 2})} / meet</p>
       <div className="flex justify-between items-center mt-auto">
         <p className="text-gray-600 text-md flex items-center">
           <img src={`${BASE_URL}/${forum.teacher_picture}`} alt="Instructor photo" className="w-9 mr-2" />

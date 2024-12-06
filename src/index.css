@@ -14,3 +14,27 @@ body {
     font-family: 'Poppins', sans-serif;
   }
 
+  @keyframes pop {
+    0% {
+      transform: scale(0.5);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  
+  .animate-pop {
+    animation: pop 0.3s ease-in-out;
+  }
+  
+  .custom-ok-button {
+    background-color: #FFA726 !important; /* Warna tombol */
+    color: white !important;             /* Warna teks */
+    border: none !important;             /* Hapus border default */
+  }
+  
+  .custom-ok-button:hover {
+    background-color: #FF9800 !important; /* Warna tombol saat hover */
+  }

@@ -592,7 +592,7 @@ const LandingPage = () => {
                 <motion.img
                   src={Join}
                   alt="Join Button"
-                  onClick={() => navigate("/register")}
+                  onClick={() => navigate("/login")}
                   className="w-20 mr-3 mb-3 cursor-pointer"
                   whileHover={{ scale: 1.07 }}
                 />
@@ -641,7 +641,7 @@ const LandingPage = () => {
               <li className="flex items-center space-x-2 space-y-2">
                 <img 
                   src={Mail} 
-                  alt="Logo Linkedin"
+                  alt="Logo Mail"
                   style={{
                     width: 24,
                     height: 24
@@ -653,7 +653,7 @@ const LandingPage = () => {
               <li className="flex items-center space-x-2 space-y-2">
                 <img 
                   src={Instagram} 
-                  alt="Logo Linkedin"
+                  alt="Logo Instagram"
                   style={{
                     width: 24,
                     height: 24

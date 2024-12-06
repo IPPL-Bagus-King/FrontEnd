@@ -1,23 +1,17 @@
 import React, { useState, useContext } from 'react';
 import LogoOrange from '../assets/logo-Orange.png';
 import LoginIllustration from '../assets/LoginIlus.png';
-import Mentor from '../assets/mentor.png';
-import Tentor from '../assets/tentor.png';
-import MentorOrange from '../assets/Mentor-Orange.png';
-import TentorWhite from '../assets/Tentor-White.png';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { jwtDecode } from "jwt-decode";
+import Swal from 'sweetalert2';
+import { motion } from 'framer-motion';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const LoginPage = () => {
-  // State untuk menangani tombol yang aktif
-  const [isMentor, setIsMentor] = useState(true);  // default is Mentor
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-
   const { setIsAuthenticated, setUser } = useContext(AuthContext);
 
   const handleLogin = async (e) => {
@@ -42,7 +36,15 @@ const LoginPage = () => {
         setIsAuthenticated(true);
         navigate('/dashboard');
       } else {
-        alert(result.message || 'Login gagal');
+        Swal.fire({
+          title: result.message,
+          text: "Periksa kembali email dan password Anda",
+          icon: "error",
+          //color: "#FFA726",
+          customClass: {
+            confirmButton: "custom-ok-button", // Tambahkan kelas kustom
+          },
+        });
       }
     } catch (error) {
       console.error('Error:', error);
@@ -51,7 +53,12 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex min-h-screen relative">
+    <motion.div
+      className="flex min-h-screen relative"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.8 }}
+    >
       {/* Logo Orange */}
       <a href="/">
         <img
@@ -67,43 +74,35 @@ const LoginPage = () => {
         className="flex flex-col items-center justify-center w-1/2"
         style={{ backgroundColor: '#FFF6E9' }}
       >
-        {/* Illustration */}
-        <img
+        <motion.img
           src={LoginIllustration}
           alt="Illustration"
           style={{ width: '558px', height: '350px' }}
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
         />
       </div>
 
       {/* Right Section */}
-      <div className="flex flex-col justify-center items-center w-1/2 bg-white p-10">
-        {/* Judul di Tengah */}
+      <motion.div
+        className="flex flex-col justify-center items-center w-1/2 bg-white p-10"
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.8 }}
+      >
         <h1 className="text-4xl font-bold mb-8 text-center" style={{ fontWeight: '1000' }}>
           Masuk Akun
         </h1>
 
-        {/* Tombol Mentor dan Tentor */}
-        <div className="flex space-x-4 mb-8 justify-center">
-          <button
-            className={`flex items-center ${isMentor ? 'bg-[#FFA726] text-white border-none' : 'bg-white text-[#FFA726] border-2 border-[#FFA726]'} px-8 py-2 rounded-md space-x-1`}
-            style={{ width: '142px', height: '40px' }}
-            onClick={() => setIsMentor(true)}  // Set state ke Mentor
-          >
-            <img src={isMentor ? Mentor : MentorOrange} alt="Mentor Logo" className="h-5 w-5" />
-            <span>Mentor</span>
-          </button>
-          <button
-            className={`flex items-center ${!isMentor ? 'bg-[#FFA726] text-white border-none' : 'bg-white text-[#FFA726] border-2 border-[#FFA726]'} px-8 py-2 rounded-md space-x-1`}
-            style={{ width: '142px', height: '40px' }}
-            onClick={() => setIsMentor(false)}  // Set state ke Tentor
-          >
-            <img src={isMentor ? Tentor : TentorWhite} alt="Tentor Logo" className="h-5 w-5" />
-            <span>Tentor</span>
-          </button>
-        </div>
-
         {/* Form */}
-        <form className="space-y-4 w-1/2" onSubmit={handleLogin}>
+        <motion.form
+          className="space-y-4 w-1/2"
+          onSubmit={handleLogin}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+        >
           {/* Email */}
           <input
             type="email"
@@ -137,37 +136,31 @@ const LoginPage = () => {
             </label>
           </div>
 
-          {/* Tombol Masuk - Bungkus dengan div untuk tengah dan margin */}
-            <div
-              className="mt-8 flex justify-center"
+          {/* Tombol Masuk */}
+          <div className="mt-8 flex justify-center">
+            <button
+              type="submit"
+              className="bg-[#FFA726] px-6 py-2 text-white rounded-md text-center flex items-center justify-center text-center"
               style={{
-                paddingTop: '24px', // Gunakan paddingTop dengan huruf kapital
+                fontSize: '13px',
+                fontWeight: 'bold',
+                padding: '12px 48px',
               }}
             >
-              <button
-                type="submit"
-                className="bg-[#FFA726] px-6 py-2 text-white rounded-md text-center flex items-center justify-center text-center"
-                style={{
-                  fontSize: '13px',
-                  fontWeight: 'bold',
-                  padding: '12px 48px',
-                }}
-              >
-                Masuk
-              </button>
-            </div>
-
-        </form>
+              Masuk
+            </button>
+          </div>
+        </motion.form>
 
         {/* Pendaftaran Akun */}
-        <p className="mt-4 text-[#000000] text-center" style={{ fontSize: '9px', fontWeight: '300' }}>
+        <p className="mt-4 text-[#000000] text-center" style={{ fontSize: '11px', fontWeight: '300' }}>
           Belum punya akun?{' '}
-          <a href="/register" className="text-[#000000]" style={{ fontSize: '9px', fontWeight: '1000' }}>
+          <a href="/register" className="text-[#000000]" style={{ fontSize: '11px', fontWeight: '1000' }}>
             Register di sini
           </a>
         </p>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

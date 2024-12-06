@@ -51,3 +51,22 @@ export const rejectTeacher = async (teacherId, token) => {
       throw new Error('Failed to reject teacher');
     }
   };
+
+  //  Register User
+  export const registerUser = async (formData) => {
+    const response = await fetch(`${BASE_URL}/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
+  
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Registrasi gagal');
+    }
+  
+    return response.json();
+  };
+  

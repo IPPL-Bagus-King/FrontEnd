@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'; // Untuk navigasi
 import LogoOrange from '../assets/logo-Orange.png'; // Logo utama
 import Forum from '../components/Forum'; // Import Komponen Forum
 import MyForum from '../components/MyForum'; // Import Komponen Forum
+import CreateForum from '../components/CreateForum';
 import HistoryCheckout from '../components/HistoryCheckout'; // Import Komponen Forum
 import KelolaMentor from '../components/KelolaMentor'; // Import Komponen KelolaMentor
 import SignOutIcon from '../assets/SignOut.png'; // Logo SignOut
@@ -14,27 +15,30 @@ import TransaksiAktif from '../assets/Transaksi-Active.png'; // Logo Transaksi A
 import TransaksiInactive from '../assets/Transaksi-Inactive.png'; // Logo Transaksi Inaktif
 import KelolaMentorAktif from '../assets/KelolaMentor-Active.png'; // Logo KelolaMentor Aktif
 import KelolaMentorInactive from '../assets/KelolaMentor-Inactive.png'; // Logo KelolaMentor Inaktif
-import LogoAdd from '../assets/LogoAdd.png';
-import { motion } from 'framer-motion';
 import { AuthContext } from '../context/AuthContext';
 import { 
   fetchForums, 
+  fetchForumsByTeacherId,
   fetchTeacher, 
   fetchRating,
   approveTeacher, 
-  rejectTeacher, 
+  rejectTeacher,
+  fetchPendingTeachers,
 } from '../services/apiService';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const DashboardPage = () => {
-  const [activeMenu, setActiveMenu] = useState('forumBelajar'); // Default menu: Forum Belajar
-  const [pendingTeachers, setPendingTeachers] = useState({data: []}); // State untuk data teacher pending
   const { user, setIsAuthenticated } = useContext(AuthContext);
+  const getDefaultMenu = (role) => { return role === 'teacher' ? 'forumTentor' : 'forumBelajar'; };
+  const [activeMenu, setActiveMenu] = useState(() => getDefaultMenu(user?.role)); // Default menu dashboard berdasarkan role
   const navigate = useNavigate(); // Untuk navigasi halaman
   
   const [forums, setForum] = useState([]);
+  const [teacherForums, setTeacherForums] = useState([]);
+  const [pendingTeachers, setPendingTeachers] = useState({data: []}); // State untuk data teacher pending
   const [historyCheckout, setHistoryCheckout] = useState([]);
   const [forumsHistory, setForumsHistory] = useState([]);
+
 
   // Fetch history checkout
   const fetchHistoryCheckout = async () => {
@@ -162,8 +166,10 @@ const DashboardPage = () => {
 
   useEffect(() => {
     const fetchAllData = async () => {
+      if (user?.role !== 'teacher') {
         await fetchData();
         await fetchHistoryCheckout();
+      }
     };
     fetchAllData();
   }, []);
@@ -172,35 +178,36 @@ const DashboardPage = () => {
     localStorage.removeItem('token'); // Hapus token
     sessionStorage.removeItem('token');
     setIsAuthenticated(false); // Update status login
-    setUser(null);
+    // setUser(null);
     navigate('/'); // Redirect ke login
   };
 
   useEffect(() => {
     if (activeMenu === 'kelolaMentor') {
-        // Define a variable to store the response
-        const fetchPendingTeachers = async () => {
-            try {
-                const response = await fetch(`${BASE_URL}/admin/pending-teacher`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${localStorage.getItem('token')}`,
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error('Failed to fetch pending teachers');
-                }
-                const data = await response.json();
-                setPendingTeachers(data);
-            } catch (error) {
-                console.error('Error:', error);
-            }
-        };
-        fetchPendingTeachers();
+      const fetchPendingTeachersData = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const data = await fetchPendingTeachers(token);
+            setPendingTeachers(data);
+        } catch (error) {
+            console.error('Error:', error);
+        }
+      };
+      fetchPendingTeachersData();
     }
-}, [activeMenu]); // Hanya fetch ulang jika activeMenu berubah
+    if (activeMenu === 'forumTentor') {
+      const fetchTeacherForums = async () => {
+        try {
+          const token = localStorage.getItem('token');
+          const data = await fetchForumsByTeacherId(user?.id, token);;
+          setTeacherForums(data); // Store the fetched forums
+        } catch (error) {
+          console.error('Error fetching forums:', error);
+        }
+      };
+      fetchTeacherForums();
+    }
+}, [activeMenu, user?.id]); // Hanya fetch ulang jika activeMenu berubah
 
 const handleApprove = async (teacherId) => {
   try {
@@ -245,18 +252,28 @@ const handleReject = async (teacherId) => {
             {forumsHistory.map((forum) => (
               <MyForum key={forum.id} forum={forum} />
             ))}
+ 
+          </div>    
+          );
+      case 'forumTentor':
+        return (
+          <div>
+             {teacherForums.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-gray-600">
+                    <p>Anda belum memiliki forum.</p>
+                </div>
+            ) : (
+          <div className="grid grid-cols-3 gap-6">
+            {teacherForums.map((teacherForum) => (
+              <MyForum key={teacherForum.id} forum={teacherForum} />
+            ))}
             <div className="flex justify-between items-center mt-auto">
-              <motion.img
-                        src={LogoAdd}
-                        alt="Add Button"
-                        onClick={() => navigate("/tambah-forum")}
-                        className="w-20 mr-3 mb-3 cursor-pointer absolute bottom-10 right-10"
-                        whileHover={{ scale: 1.07 }}
-                      />
+              <CreateForum />
             </div>
           </div>
-          
-          );
+            )}
+          </div>
+        );
       case 'transaksi':
         return (
           <div className="grid grid-cols-3 gap-6">
@@ -311,7 +328,9 @@ const handleReject = async (teacherId) => {
 
         {/* Menu */}
         <div className="w-full px-4 space-y-4">
+
           {/* Forum Belajar */}
+          {user?.role !== 'teacher' && (
           <button
             className={`w-full flex justify-center py-2 rounded-lg ${
               activeMenu === 'forumBelajar' ? 'bg-[#FFA726]' : 'bg-white'
@@ -324,9 +343,9 @@ const handleReject = async (teacherId) => {
               className="w-[80%] h-8 object-contain" // Ukuran lebih kecil
             />
           </button>
-
+          )}
           {/* Forum Saya */}
-          {user?.role !== 'admin' && (
+          {user?.role === 'student' && (
           <button
             className={`w-full flex justify-center py-2 rounded-lg ${
               activeMenu === 'forumSaya' ? 'bg-[#FFA726]' : 'bg-white'
@@ -336,6 +355,22 @@ const handleReject = async (teacherId) => {
             <img
               src={activeMenu === 'forumSaya' ? ForumSayaAktif : ForumSayaInactive}
               alt="Forum Saya"
+              className="w-[80%] h-8 object-contain" // Ukuran lebih kecil
+            />
+          </button>
+          )}
+
+          {/* Forum Saya Tentor*/}
+          {user?.role === 'teacher' && (
+          <button
+            className={`w-full flex justify-center py-2 rounded-lg ${
+              activeMenu === 'forumTentor' ? 'bg-[#FFA726]' : 'bg-white'
+            }`}
+            onClick={() => setActiveMenu('forumTentor')}
+          >
+            <img
+              src={activeMenu === 'forumTentor' ? ForumSayaAktif : ForumSayaInactive}
+              alt="Forum Saya Tentor"
               className="w-[80%] h-8 object-contain" // Ukuran lebih kecil
             />
           </button>

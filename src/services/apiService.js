@@ -7,6 +7,44 @@ export const fetchForums = async () => {
     return response.json();
   };
 
+// Fetch forums by teacher id and combine data
+export const fetchForumsByTeacherId = async (teacherId, token) => {
+  const response = await fetch(`${BASE_URL}/forum/teacher-forums/${teacherId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch forums by teacher id: ${response.statusText}`);
+  }
+
+  const forums = await response.json();
+
+  // For each forum, fetch teacher data and rating
+  const enrichedForums = await Promise.all(
+    forums.data.map(async (forum) => {
+      try {
+        const teacherData = await fetchTeacher(forum.teacher_id);
+        const ratingData = await fetchRating(forum.id);
+
+        return {
+          ...forum,
+          teacher_name: teacherData.data.username,
+          teacher_picture: teacherData.data.picture,
+          rating: ratingData.averageRating,
+        };
+      } catch (error) {
+        console.error(`Failed to fetch additional data for forum ${forum.id}:`, error);
+        return forum;
+      }
+    })
+  );
+  return enrichedForums;
+};
+
 // Fetch teacher data
 export const fetchTeacher = async (teacherId) => {
     const response = await fetch(`${BASE_URL}/users/${teacherId}`);
@@ -17,6 +55,7 @@ export const fetchTeacher = async (teacherId) => {
 // Fetch forum rating
 export const fetchRating = async (forumId) => {
     const response = await fetch(`${BASE_URL}/review/${forumId}`);
+    if (!response.ok) throw new Error(`Failed to fetch forum review with id ${forumId}`);
     return response.json();
   };
   
@@ -52,21 +91,60 @@ export const rejectTeacher = async (teacherId, token) => {
     }
   };
 
-  //  Register User
-  export const registerUser = async (formData) => {
-    const response = await fetch(`${BASE_URL}/auth/register`, {
+  // Fetch pending teachers
+export const fetchPendingTeachers = async (token) => {
+  const response = await fetch(`${BASE_URL}/admin/pending-teacher`, {
+      method: 'GET',
+      headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+      },
+  });
+
+  if (!response.ok) {
+      throw new Error('Failed to fetch pending teachers');
+  }
+
+  return response.json();
+};
+
+//  Register User
+export const registerUser = async (formData) => {
+  const response = await fetch(`${BASE_URL}/auth/register`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(formData),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Registrasi gagal');
+  }
+
+  return response.json();
+};
+
+export const createForum = async (formData, token) => {
+  try {
+    const response = await fetch(`${BASE_URL}/forum`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`, // Gunakan token untuk otorisasi
       },
       body: JSON.stringify(formData),
     });
-  
+
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Registrasi gagal');
+      throw new Error(`Failed to create forum: ${response.statusText}`);
     }
-  
-    return response.json();
-  };
+
+    return await response.json(); // Kembalikan data forum yang baru dibuat
+  } catch (error) {
+    console.error('Error creating forum:', error);
+    throw error; // Re-throw error supaya bisa ditangani di komponen
+  }
+};
   

@@ -4,7 +4,6 @@ import LogoOrange from '../assets/logo-Orange.png'; // Logo utama
 import Forum from '../components/Forum'; // Import Komponen Forum
 import MyForum from '../components/MyForum'; // Import Komponen Forum
 import CreateForum from '../components/CreateForum';
-import LogoAdd from '../assets/LogoAdd.png'; // Logo Add
 import HistoryCheckout from '../components/HistoryCheckout'; // Import Komponen Forum
 import KelolaMentor from '../components/KelolaMentor'; // Import Komponen KelolaMentor
 import SignOutIcon from '../assets/SignOut.png'; // Logo SignOut
@@ -48,6 +47,7 @@ const DashboardPage = () => {
   const [filteredForumsHistory, setFilteredForumsHistory] = useState(forumsHistory);
   const [filteredHistoryCheckout, setFilteredHistoryCheckout] = useState(historyCheckout);
   const [filteredPendingTeachers, setFilteredPendingTeachers] = useState(pendingTeachers.data);
+  const [filteredTeacherForums, setFilteredTeacherForums] = useState(teacherForums);
 
 
   // Fetch history checkout
@@ -188,7 +188,7 @@ const DashboardPage = () => {
     localStorage.removeItem('token'); // Hapus token
     sessionStorage.removeItem('token');
     setIsAuthenticated(false); // Update status login
-    // setUser(null);
+    setUser(null);
     navigate('/'); // Redirect ke login
   };
 
@@ -264,67 +264,79 @@ const handleReject = async (teacherId) => {
             )}
           </div>
         );
-      case 'forumSaya':
+        case 'forumSaya':
+          return (
+            <div>
+              {filteredForumsHistory.length === 0 ? (
+                <div className="flex justify-center items-center h-full py-48">
+                  <img src={NotFound} alt="Not Found" className="w-72" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-6">
+                  {filteredForumsHistory.map((forum) => (
+                    <MyForum key={forum.id} forum={forum} />
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+      case 'forumTentor':
         return (
           <div>
-            {filteredForumsHistory.length === 0 ? (
-              <div className="flex justify-center items-center h-full py-48">
-                <img src={NotFound} alt="Not Found" className="w-72" />
-              </div>
+              {filteredTeacherForums.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-gray-600">
+                    <p>Anda belum memiliki forum.</p>
+                </div>
             ) : (
-              <div className="grid grid-cols-3 gap-6">
-                {filteredForumsHistory.map((forum) => (
-                  <MyForum key={forum.id} forum={forum} />
-                ))}
-              </div>
-            )}
-            <motion.img
-              src={LogoAdd}
-              alt="Add Button"
-              onClick={() => navigate("/tambah-forum")}
-              className="w-20 mr-3 mb-3 cursor-pointer absolute bottom-10 right-10"
-              whileHover={{ scale: 1.07 }}
-            />
+          <div className="grid grid-cols-3 gap-6">
+            {filteredTeacherForums.map((teacherForum) => (
+              <MyForum key={teacherForum.id} forum={teacherForum} />
+            ))}
+            <div className="flex justify-between items-center mt-auto">
+              <CreateForum />
+            </div>
           </div>
-        );
-      case 'transaksi':
-        return (
-          <div>
-            {filteredHistoryCheckout.length === 0 ? (
-              <div className="flex justify-center items-center h-full py-48">
-                <img src={NotFound} alt="Not Found" className="w-72" />
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-6">
-                {filteredHistoryCheckout.slice().reverse().map((transaction) => (
-                  <HistoryCheckout key={transaction.id} forum={transaction} />
-                ))}
-              </div>
             )}
           </div>
         );
-      case 'kelolaMentor':
-        return (
-          <div>
-            {filteredPendingTeachers.length === 0 ? (
-              <div className="flex justify-center items-center h-full text-gray-600">
-                <p>Tidak ada mentor yang menunggu persetujuan.</p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-4 gap-6">
-                {filteredPendingTeachers.map((teacher) => (
-                  <KelolaMentor
-                    key={teacher.id}
-                    teacher={teacher}
-                    onApprove={() => handleApprove(teacher.id)}
-                    onReject={() => handleReject(teacher.id)}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
-        );
-      default:
+        case 'transaksi':
+          return (
+            <div>
+              {filteredHistoryCheckout.length === 0 ? (
+                <div className="flex justify-center items-center h-full py-48">
+                  <img src={NotFound} alt="Not Found" className="w-72" />
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-6">
+                  {filteredHistoryCheckout.slice().reverse().map((transaction) => (
+                    <HistoryCheckout key={transaction.id} forum={transaction} />
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        case 'kelolaMentor':
+          return (
+            <div>
+              {filteredPendingTeachers.length === 0 ? (
+                <div className="flex justify-center items-center h-full text-gray-600">
+                  <p>Tidak ada mentor yang menunggu persetujuan.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-4 gap-6">
+                  {filteredPendingTeachers.map((teacher) => (
+                    <KelolaMentor
+                      key={teacher.id}
+                      teacher={teacher}
+                      onApprove={() => handleApprove(teacher.id)}
+                      onReject={() => handleReject(teacher.id)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+          default:
         return null;
     }
   };
@@ -348,6 +360,11 @@ const handleReject = async (teacherId) => {
           forum.name.toLowerCase().includes(searchQuery)
         ));
         break;
+      case 'forumTentor':
+        setFilteredTeacherForums(teacherForums.filter((forum) =>
+          forum.name.toLowerCase().includes(searchQuery)
+        ));
+        break;
       case 'transaksi':
         setFilteredHistoryCheckout(historyCheckout.filter((transaction) =>
           transaction.name.toLowerCase().includes(searchQuery)
@@ -368,7 +385,8 @@ const handleReject = async (teacherId) => {
     setFilteredForumsHistory(forumsHistory);
     setFilteredHistoryCheckout(historyCheckout);
     setFilteredPendingTeachers(pendingTeachers.data);
-  }, [forums, forumsHistory, historyCheckout, pendingTeachers]);
+    setFilteredTeacherForums(teacherForums)
+  }, [forums, forumsHistory, historyCheckout, pendingTeachers, teacherForums]);
   
   return (
     <div className="flex min-h-screen">

@@ -95,7 +95,17 @@ const Forum = ({ forum }) => {
       <div className="course-card border border-gray-200 rounded-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-in-out p-4 flex flex-col" style={{ aspectRatio: '6/5' }}>
         <img src={`${BASE_URL}/${forum.picture}`} alt={forum.name} className="w-full h-40 object-cover rounded-lg mb-4 transform transition-all duration-500 ease-in-out" />
         <div className="flex justify-between items-center mb-2">
-          <h2 className="course-title">{forum.name}</h2>
+          <h2 
+          className="course-title text-md font-semibold truncate"
+          style={{ 
+            maxWidth: '80%',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+          >
+            {forum.name
+          }</h2>
           <p className="text-yellow-500 text-sm text-lg">{forum.rating} ⭐</p>
         </div>
         <p className="text-md mb-2">Rp {parseFloat(forum.price).toLocaleString("id-ID", {minimumFractionDigits: 2, maximumFractionDigits: 2})} / meet</p>
@@ -107,7 +117,7 @@ const Forum = ({ forum }) => {
           <img 
             src={Join} 
             alt="Join Button" 
-            className="w-20 mr-3 mb-3 transition-all duration-300 transform hover:scale-105 cursor-pointer"
+            className="w-20 mr-3 mb-3 duration-300 transform hover:scale-105"
             onClick={handleJoinClick}
           />
         </div>

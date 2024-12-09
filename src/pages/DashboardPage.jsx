@@ -6,8 +6,11 @@ import MyForum from '../components/MyForum'; // Import Komponen Forum
 import HistoryCheckout from '../components/HistoryCheckout'; // Import Komponen Forum
 import KelolaMentor from '../components/KelolaMentor'; // Import Komponen KelolaMentor
 import SignOutIcon from '../assets/SignOut.png'; // Logo SignOut
+import Search from '../assets/search.png';
+import Filter from '../assets/filter.png';
 import ForumBelajarAktif from '../assets/ForumBelajar-Active.png'; // Logo Forum Belajar Aktif
 import ForumBelajarInactive from '../assets/ForumBelajar-Inactive.png'; // Logo Forum Belajar Inaktif
+import NotFound from '../assets/ItemNotFound.png'; // Logo Not Found
 import ForumSayaInactive from '../assets/ForumSaya-Inactive.png'; // Logo Forum Saya Inaktif
 import ForumSayaAktif from '../assets/ForumSaya-Active.png'; // Logo Forum Saya Aktif
 import TransaksiAktif from '../assets/Transaksi-Active.png'; // Logo Transaksi Aktif
@@ -35,6 +38,11 @@ const DashboardPage = () => {
   const [forums, setForum] = useState([]);
   const [historyCheckout, setHistoryCheckout] = useState([]);
   const [forumsHistory, setForumsHistory] = useState([]);
+
+  const [filteredForums, setFilteredForums] = useState(forums);
+  const [filteredForumsHistory, setFilteredForumsHistory] = useState(forumsHistory);
+  const [filteredHistoryCheckout, setFilteredHistoryCheckout] = useState(historyCheckout);
+  const [filteredPendingTeachers, setFilteredPendingTeachers] = useState(pendingTeachers.data);
 
   // Fetch history checkout
   const fetchHistoryCheckout = async () => {
@@ -233,57 +241,77 @@ const handleReject = async (teacherId) => {
     switch (activeMenu) {
       case 'forumBelajar':
         return (
-          <div className="grid grid-cols-3 gap-6">
-            {forums.map((forum) => (
-              <Forum key={forum.id} forum={forum} />
-            ))}
+          <div>
+            {filteredForums.length === 0 ? (
+              <div className="flex justify-center items-center h-full py-48">
+                <img src={NotFound} alt="Not Found" className="w-72" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-6">
+                {filteredForums.map((forum) => (
+                  <Forum key={forum.id} forum={forum} />
+                ))}
+              </div>
+            )}
           </div>
         );
       case 'forumSaya':
         return (
-          <div className="grid grid-cols-3 gap-6">
-            {forumsHistory.map((forum) => (
-              <MyForum key={forum.id} forum={forum} />
-            ))}
-            <div className="flex justify-between items-center mt-auto">
-              <motion.img
-                        src={LogoAdd}
-                        alt="Add Button"
-                        onClick={() => navigate("/tambah-forum")}
-                        className="w-20 mr-3 mb-3 cursor-pointer absolute bottom-10 right-10"
-                        whileHover={{ scale: 1.07 }}
-                      />
-            </div>
+          <div>
+            {filteredForumsHistory.length === 0 ? (
+              <div className="flex justify-center items-center h-full py-48">
+                <img src={NotFound} alt="Not Found" className="w-72" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-6">
+                {filteredForumsHistory.map((forum) => (
+                  <MyForum key={forum.id} forum={forum} />
+                ))}
+              </div>
+            )}
+            <motion.img
+              src={LogoAdd}
+              alt="Add Button"
+              onClick={() => navigate("/tambah-forum")}
+              className="w-20 mr-3 mb-3 cursor-pointer absolute bottom-10 right-10"
+              whileHover={{ scale: 1.07 }}
+            />
           </div>
-          
-          );
+        );
       case 'transaksi':
         return (
-          <div className="grid grid-cols-3 gap-6">
-            {historyCheckout.slice().reverse().map((forum) => (
-              <HistoryCheckout key={forum.id} forum={forum} />
-            ))}
+          <div>
+            {filteredHistoryCheckout.length === 0 ? (
+              <div className="flex justify-center items-center h-full py-48">
+                <img src={NotFound} alt="Not Found" className="w-72" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-6">
+                {filteredHistoryCheckout.slice().reverse().map((transaction) => (
+                  <HistoryCheckout key={transaction.id} forum={transaction} />
+                ))}
+              </div>
+            )}
           </div>
         );
       case 'kelolaMentor':
         return (
           <div>
-             {pendingTeachers.data.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-gray-600">
-                    <p>Tidak ada mentor yang menunggu persetujuan.</p>
-                </div>
+            {filteredPendingTeachers.length === 0 ? (
+              <div className="flex justify-center items-center h-full text-gray-600">
+                <p>Tidak ada mentor yang menunggu persetujuan.</p>
+              </div>
             ) : (
               <div className="grid grid-cols-4 gap-6">
-                {pendingTeachers.data.map((teacher) => (
+                {filteredPendingTeachers.map((teacher) => (
                   <KelolaMentor
                     key={teacher.id}
                     teacher={teacher}
-                    onApprove={() => handleApprove(teacher.id)} // Fungsi untuk menyetujui
-                    onReject={() => handleReject(teacher.id)} // Fungsi untuk menolak
-                    setActiveMenu={setActiveMenu}
+                    onApprove={() => handleApprove(teacher.id)}
+                    onReject={() => handleReject(teacher.id)}
                   />
                 ))}
-            </div>
+              </div>
             )}
           </div>
         );
@@ -291,26 +319,67 @@ const handleReject = async (teacherId) => {
         return null;
     }
   };
+  
 
+  // Handle Search
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
+    const searchQuery = event.target.value.toLowerCase();
+  
+    switch (activeMenu) {
+      case 'forumBelajar':
+        setFilteredForums(forums.filter((forum) =>
+          forum.name.toLowerCase().includes(searchQuery)
+        ));
+        break;
+      case 'forumSaya':
+        setFilteredForumsHistory(forumsHistory.filter((forum) =>
+          forum.name.toLowerCase().includes(searchQuery)
+        ));
+        break;
+      case 'transaksi':
+        setFilteredHistoryCheckout(historyCheckout.filter((transaction) =>
+          transaction.name.toLowerCase().includes(searchQuery)
+        ));
+        break;
+      case 'kelolaMentor':
+        setFilteredPendingTeachers(pendingTeachers.data.filter((teacher) =>
+          teacher.name.toLowerCase().includes(searchQuery)
+        ));
+        break;
+      default:
+        break;
+    }
+  };
+  
+  useEffect(() => {
+    setFilteredForums(forums);
+    setFilteredForumsHistory(forumsHistory);
+    setFilteredHistoryCheckout(historyCheckout);
+    setFilteredPendingTeachers(pendingTeachers.data);
+  }, [forums, forumsHistory, historyCheckout, pendingTeachers]);
+  
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
       <div
         className="w-[18%] bg-white relative border-r border-[#FFA726] flex flex-col items-center py-6 space-y-6"
-        style={{ minHeight: '100vh' }}
+        style={{ height: '100vh', position: 'sticky', top: 0  }}
       >
         {/* Logo */}
-        <img src={LogoOrange} alt="Logo Orange" className="w-16" />
+        <img src={LogoOrange} alt="Logo Orange" className="w-28" />
 
         {/* Profile */}
         <div className="flex flex-col items-center space-y-2">
-          <img src={`${BASE_URL}/${user.picture}`} alt="Profile" className="w-14 h-14 rounded-full" />
+          <img src={`${BASE_URL}/${user.picture}`} alt="Profile" className="w-16 h-16 rounded-full mt-4" />
           <h2 className="text-lg font-semibold text-center">{user.name}</h2>
           <p className="text-gray-500 text-sm text-center">{user.role}</p>
         </div>
 
         {/* Menu */}
-        <div className="w-full px-4 space-y-4">
+        <div className="w-full px-4 space-y-4 flex-grow">
           {/* Forum Belajar */}
           <button
             className={`w-full flex justify-center py-2 rounded-lg ${
@@ -387,17 +456,40 @@ const handleReject = async (teacherId) => {
       <div className="flex-1 bg-white p-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-semibold capitalize">
+          <h1 className="text-3xl font-semibold capitalize text-[#FFA726]">
             {activeMenu.replace('forum', 'Forum ').replace('transaksi', 'Transaksi').replace('kelola', 'Kelola ')}
           </h1>
-          <div className="flex items-center bg-[#F7F7F7] px-4 py-2 rounded-md">
+          
+          {/* Search Section */}
+          <div className="flex items-center relative">
+            <img 
+              src={Filter} 
+              alt="Filer Icon" 
+              className="w-11 h-11 mr-2" 
+              />
+            <input
+              type="text"
+              placeholder="Search..."
+              className="w-72 pl-10 px-2 py-3 rounded-3xl border border-[#ffa726] focus:outline-none focus:ring-2 focus:ring-[#ffe4bc] transition-all duration-200 ease-in-out shadow-sm"
+              value={searchTerm}
+              onChange={handleSearch}
+              onKeyDown={(e)=>{
+                if(e.key === 'Enter'){
+                  handleSearch(e)
+                }
+              }}
+            />
+            <img src={Search} alt="Search Icon" className="absolute left-16 top-1/2 transform -translate-y-1/2 w-5 h-5" />
+          </div>
+
+          {/* <div className="flex items-center bg-[#F7F7F7] px-4 py-2 rounded-md">
             <input
               type="text"
               className="bg-transparent border-none outline-none"
               placeholder="Search..."
             />
             <button className="ml-2 text-[#FFA726]">🔍</button>
-          </div>
+          </div> */}
         </div>
 
         {/* Render Konten berdasarkan Menu */}

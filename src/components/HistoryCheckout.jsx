@@ -126,7 +126,7 @@ const Forum = ({ forum }) => {
                   </div>
                 </div>
                 <button
-                  onClick={() => alert('Join Button Clicked')} // Replace with your function to handle payment
+                  onClick={() => {window.location.reload()}} // Replace with your function to handle payment
                   className="w-full bg-yellow-600 text-white font-medium py-3 rounded-lg shadow hover:bg-yellow-700 transition duration-300"
                 >
                   Complete Payment

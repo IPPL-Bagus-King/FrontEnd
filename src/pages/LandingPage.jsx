@@ -171,14 +171,6 @@ const LandingPage = () => {
     visible: { opacity: 1, x: 0, transition: { duration: 0.5, delay: 0.2, ease: 'easeOut' } },
   };
 
-  const gridVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.2, delayChildren: 0.1  },
-    },
-  };
-
   const dividerVariants = {
     initial: {
       scaleY: 0,
@@ -536,12 +528,11 @@ const LandingPage = () => {
         </div>
       ) : (
         // Jika ada data di filteredCourses
-        <motion.div
+        <div
           key={`grid-${filteredCourses.length}`}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           initial="hidden"
           animate="visible"
-          variants={gridVariants}
         >
           {filteredCourses.map((course, index) => (
             <motion.div
@@ -555,7 +546,7 @@ const LandingPage = () => {
               initial="hidden"
               whileInView="visible"
               transition={{
-                duration: 0.6,
+                duration: 0.4,
               }}
               whileHover={{
                 scale: 1.05,
@@ -563,7 +554,6 @@ const LandingPage = () => {
                 transition: {
                   duration: 0.2,
                   ease: "easeInOut",
-                  rest: { duration: 0.1 },
                 },
               }}
             >
@@ -571,7 +561,6 @@ const LandingPage = () => {
                 src={`${BASE_URL}/${course.picture}`}
                 alt={course.name}
                 className="w-full h-40 object-cover rounded-lg mb-4"
-                loading="lazy"
               />
               <div className="flex justify-between items-center mb-2">
                 <h2 className="text-2xl font-semibold text-gray-800">{course.name}</h2>
@@ -599,7 +588,7 @@ const LandingPage = () => {
               </div>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
       )}
 
       </section>

@@ -32,6 +32,22 @@ const LoginPage = () => {
         localStorage.setItem('token', result.token);
         // Dekode token untuk mendapatkan data pengguna
         const decoded = jwtDecode(result.token);
+
+        // Validasi status pengguna
+        if (decoded.status !== 'approved') {
+          // Hapus token dari localStorage karena login gagal
+          localStorage.removeItem('token');
+          Swal.fire({
+            title: 'Akun belum disetujui!',
+            text: 'Akun anda masih dalam proses pengecekan oleh admin.',
+            icon: 'warning',
+            customClass: {
+              confirmButton: 'custom-ok-button',
+            },
+          });
+          return; // keluar dari proses login
+        }
+
         setUser(decoded);
         setIsAuthenticated(true);
         navigate('/dashboard');

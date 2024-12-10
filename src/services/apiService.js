@@ -147,4 +147,33 @@ export const createForum = async (formData, token) => {
     throw error; // Re-throw error supaya bisa ditangani di komponen
   }
 };
-  
+
+
+// Fetch checkout 
+export const fetchCheckout = async (forumId) => {
+  try {
+    const response = await fetch(`${BASE_URL}/checkout/check-purchase/${forumId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+
+    // Menangani status selain 200
+    if (!response.ok) {
+      if (response.status === 404) {
+        return 'not_found'; // Jika 404, kembalikan 'not_found'
+      }
+      throw new Error(`Failed to fetch checkout data: ${response.statusText}`);
+    }
+
+    const data = await response.json(); // Mengambil data JSON
+    return data; // Mengembalikan data checkout yang valid jika status 200
+
+  } catch (error) {
+    console.error('Error fetching checkout data:', error);
+    return 'not_found'; // Jika terjadi error, kembalikan 'not_found'
+  }
+
+};

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom'; // Import Link from react-router-dom
 import Join from '../assets/JoinButton.png'; // Gambar button Join
 import './Forum.css'; // Import file CSS
 import Modal from './ModalForm';
@@ -30,6 +31,7 @@ const Forum = ({ forum }) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
+        
         body: JSON.stringify({
           id_product: forum.id,
           bank: bank,
@@ -53,7 +55,6 @@ const Forum = ({ forum }) => {
     } finally {
       setIsModalOpen(true);
     }
-  
   };
 
   const openPopup = (data) => {
@@ -79,7 +80,9 @@ const Forum = ({ forum }) => {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
       });
+
       const data = await response.json();
+      console.log("Response checkout:", data.status);
       // Cek status pembelian dan buka pop-up dengan data yang sesuai
       if (data.data.status === 'settlement' || data.data.status === 'pending') {
         handleOpenPopup(data.data); // Menggunakan openPopup untuk menyimpan data dan menampilkan pop-up
@@ -90,22 +93,23 @@ const Forum = ({ forum }) => {
       console.error('Error fetching purchase data:', error);
     }
   };
+
   return (
     <div>
       <div className="course-card border border-gray-200 rounded-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-in-out p-4 flex flex-col" style={{ aspectRatio: '6/5' }}>
         <img src={`${BASE_URL}/${forum.picture}`} alt={forum.name} className="w-full h-40 object-cover rounded-lg mb-4 transform transition-all duration-500 ease-in-out" />
         <div className="flex justify-between items-center mb-2">
           <h2 
-          className="course-title text-md font-semibold truncate"
-          style={{ 
-            maxWidth: '80%',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
+            className="course-title text-md font-semibold truncate"
+            style={{ 
+              maxWidth: '80%',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
           >
-            {forum.name
-          }</h2>
+            {forum.name}
+          </h2>
           <p className="text-yellow-500 text-sm text-lg">{forum.rating} ⭐</p>
         </div>
         <p className="text-md mb-2">Rp {parseFloat(forum.price).toLocaleString("id-ID", {minimumFractionDigits: 2, maximumFractionDigits: 2})} / meet</p>
@@ -114,16 +118,26 @@ const Forum = ({ forum }) => {
             <img src={`${BASE_URL}/${forum.teacher_picture}`} alt="Instructor photo" className="w-9 mr-2" />
             {forum.teacher_name}
           </p>
-          <img 
-            src={Join} 
-            alt="Join Button" 
-            className="w-20 mr-3 mb-3 duration-300 transform hover:scale-105"
-            onClick={handleJoinClick}
-          />
+          <div className="flex space-x-2">
+          <Link to={`/forum/${forum.id}`}>
+          <button 
+            className="w-20 h-9 bg-[#ffa726] text-white rounded-full flex justify-center items-center duration-300 transform hover:scale-105 font-semibold"
+            style={{ fontFamily: 'Poppins, sans-serif' }}
+          >
+            Detail
+          </button>
+        </Link>
+            <img 
+              src={Join} 
+              alt="Join Button" 
+              className="w-20 mr-3 mb-3 duration-300 transform hover:scale-105"
+              onClick={handleJoinClick}
+            />
+            
+          </div>
         </div>
-
-      {/* Pop-up */}
-    </div>
+      </div>
+      
       {isPopupVisible && (
         <div className="fixed inset-0 bg-black flex items-center justify-center z-30" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}>
           {/* Modal Content */}
@@ -154,12 +168,13 @@ const Forum = ({ forum }) => {
                     <span className="font-medium">Rating:</span> {forum.rating} ⭐
                   </p>
                 </div>
-                <button
-                  onClick={() => alert('Join Button Clicked')} // Replace with your function to navigate to the forum
-                  className="w-full bg-green-600 text-white font-medium py-3 rounded-lg shadow hover:bg-green-700 transition duration-300"
-                >
-                  Go to Forum
-                </button>
+                <Link to={`/forum/${forum.id}`}>
+                  <button 
+                    className="w-full bg-green-600 text-white font-medium py-3 rounded-lg shadow hover:bg-green-700 transition duration-300"
+                  >
+                    Go to Forum
+                  </button>
+                </Link>
               </div>            
             ) : popupData.status === 'pending' ? (
               <div className="space-y-4">
@@ -201,98 +216,94 @@ const Forum = ({ forum }) => {
               </div>
             ) : (
               <div className="space-y-6">
-              <h2 className="text-2xl font-semibold text-blue-600 mb-4">
-                Buy this Forum 💡
-              </h2>
-              <div className="bg-gray-50 p-4 rounded-lg shadow space-y-2">
-                <p className="text-lg font-bold text-gray-800">{forum.name}</p>
-                <p className="text-gray-700">
-                  <span className="font-medium">Instructor:</span> {forum.teacher_name}
-                </p>
-                <p className="text-gray-700">
-                  <span className="font-medium">Description:</span> {forum.description}
-                </p>
-                <p className="text-gray-700">
-                  <span className="font-medium">Rating:</span> {forum.rating} ⭐
-                </p>
-                <p className="text-gray-700">
-                  <span className="font-medium">Price:</span> Rp{" "}
-                  {parseFloat(forum.price).toLocaleString("id-ID", {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-                </p>
-              </div>
-              <form onSubmit={handlePurchase} className="space-y-4">
-                <div>
-                  <label htmlFor="bank" className="block text-gray-700 font-medium">
-                    Select Bank
-                  </label>
-                  <select
-                    id="bank"
-                    value={bank}
-                    onChange={(e) => setBank(e.target.value)}
-                    required
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2 mt-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="" disabled>
-                      Choose a Virtual Account Bank
-                    </option>
-                    <option value="BCA">BCA</option>
-                    <option value="BRI">BRI</option>
-                    <option value="BNI">BNI</option>
-                    <option value="CIMB">CIMB</option>
-                  </select>
+                <h2 className="text-2xl font-semibold text-blue-600 mb-4">
+                  Buy this Forum 💡
+                </h2>
+                <div className="bg-gray-50 p-4 rounded-lg shadow space-y-2">
+                  <p className="text-lg font-bold text-gray-800">{forum.name}</p>
+                  <p className="text-gray-700">
+                    <span className="font-medium">Instructor:</span> {forum.teacher_name}
+                  </p>
+                  <p className="text-gray-700">
+                    <span className="font-medium">Description:</span> {forum.description}
+                  </p>
+                  <p className="text-gray-700">
+                    <span className="font-medium">Rating:</span> {forum.rating} ⭐
+                  </p>
+                  <p className="text-gray-700">
+                    <span className="font-medium">Price:</span> Rp{" "}
+                    {parseFloat(forum.price).toLocaleString("id-ID", {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                  </p>
                 </div>
-                <button
-                  type="submit"
-                  onClick={() => setIsPurchaseButtonVisible(true)}
-                  className="w-full bg-blue-600 text-white font-medium py-3 rounded-lg shadow hover:bg-blue-700 transition duration-300"
-                >
-                  Purchase
-                </button>
-              </form>
-              <Modal
-                isOpen={isModalOpen}
-                onClose={() => {
-                  window.location.reload();
-                }}              
-                title="Purchase Confirmation"
-              >
-                <p>{modalContent}</p>
-                  <div className="mt-4 flex justify-end">
-                    {isPurchaseButtonVisible && (
-                      <>
-                        <button
-                          onClick={() => window.location.reload()}
-                          className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg mr-2 hover:bg-gray-400"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={() => {
-                            confirmPurchase();
-                          }}
-                          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                        >
-                          Confirm
-                        </button>
-                      </>
-                    )}
+                <form onSubmit={handlePurchase} className="space-y-4">
+                  <div>
+                    <label htmlFor="bank" className="block text-gray-700 font-medium">
+                      Select Bank
+                    </label>
+                    <select
+                      id="bank"
+                      value={bank}
+                      onChange={(e) => setBank(e.target.value)}
+                      required
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2 mt-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="" disabled>
+                        Choose a Virtual Account Bank
+                      </option>
+                      <option value="BCA">BCA</option>
+                      <option value="BRI">BRI</option>
+                      <option value="BNI">BNI</option>
+                      <option value="CIMB">CIMB</option>
+                    </select>
                   </div>
-              </Modal>
-            </div>
-        
+                  <button
+                    type="submit"
+                    onClick={() => setIsPurchaseButtonVisible(true)}
+                    className="w-full bg-blue-600 text-white font-medium py-3 rounded-lg shadow hover:bg-blue-700 transition duration-300"
+                  >
+                    Purchase
+                  </button>
+                </form>
+                <Modal
+                  isOpen={isModalOpen}
+                  onClose={() => {
+                    window.location.reload();
+                  }}              
+                  title="Purchase Confirmation"
+                >
+                  <p>{modalContent}</p>
+                    <div className="mt-4 flex justify-end">
+                      {isPurchaseButtonVisible && (
+                        <>
+                          <button
+                            onClick={() => window.location.reload()}
+                            className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg mr-2 hover:bg-gray-400"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => {
+                              confirmPurchase();
+                            }}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                          >
+                            Confirm
+                          </button>
+                        </>
+                      )}
+                    </div>
+                </Modal>            
+              </div>
             )}
-
-            {/* Close Button */}
             <button
               onClick={closePopup}
-              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition duration-300 text-2xl w-10 h-10 flex items-center justify-center"
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
             >
-              ✖
+              &times;
             </button>
           </div>
         </div>
       )}
-
     </div>
   );
 };

@@ -158,7 +158,7 @@ const ForumDetail = () => {
         
         {/* Forum Name on Top of the Image */}
         <div className="absolute bottom-4 left-4 bg-[#FFA726] p-2 rounded-md">
-          <h2 className="text-white font-bold text-xl font-poppins shadow-xl">{forum.name}</h2>
+          <h2 className="text-white font-bold text-xl font-poppins">{forum.name}</h2>
         </div>
         <button
           onClick={() => navigate(-1)}
@@ -169,9 +169,9 @@ const ForumDetail = () => {
       </div>
 
       {/* Main Content with Two Columns */}
-      <div className="mt-6 flex gap-6">
+      <div className="mt-6 flex gap-6 w-full max-w-screen-lg">
         {/* Left Column */}
-        <div className="w-1/5 space-y-4">
+        <div className="w-1/4 min-w-[180px] max-w-[300px] space-y-4">
           {/* ID Forum Section */}
           <div className="bg-white p-4 rounded-md shadow-md">
             <h3 className="text-xl font-semibold">ID Forum</h3>
@@ -179,7 +179,7 @@ const ForumDetail = () => {
           </div>
 
           {/* Harga Section */}
-          <div className="bg-white p-4 rounded-md shadow-md flex items-center justify-between">
+          <div className="bg-white p-4 rounded-md shadow-md flex flex-col items-start">
             <div>
               <h3 className="text-xl font-semibold">Harga</h3>
               <p className="mt-2 text-gray-600">
@@ -197,7 +197,7 @@ const ForumDetail = () => {
                   handleDaftarClick("default");
                 }
               }}
-              className={`py-1 px-3 rounded-md text-white text-sm font-poppins transform transition-all hover:scale-105 ${
+              className={`mt-4 py-1 px-3 rounded-md text-white text-sm font-poppins transform transition-all hover:scale-105 ${
                 checkoutData?.data?.status === "settlement"
                   ? "bg-[#5cb85c] cursor-pointer"
                   : checkoutData?.data?.status === "pending"
@@ -212,6 +212,7 @@ const ForumDetail = () => {
                 : "Daftar Sekarang"}
             </button>
           </div>
+
 
 
           <div>

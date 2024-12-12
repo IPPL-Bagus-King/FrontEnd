@@ -280,7 +280,7 @@ const LandingPage = () => {
     >
       {/* Left Section */}
       <motion.div
-        className="w-2/5 flex flex-col justify-center px-10 ml-12"
+        className="w-2/5 flex flex-col justify-center px-10 ml-12 mb-20"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -326,7 +326,7 @@ const LandingPage = () => {
         <img
           src={PeopleImage}
           alt="People"
-          className="relative z- max-w-xs md:max-w-md lg:max-w-lg transform -translate-x-16 scale-110 mr-12 mb-12"
+          className="relative z- max-w-xs md:max-w-md lg:max-w-lg transform -translate-x-16 scale-110 mr-12 mb-20"
         />
       </div>
     </div>

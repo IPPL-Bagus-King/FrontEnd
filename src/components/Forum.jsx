@@ -297,9 +297,9 @@ const Forum = ({ forum }) => {
             )}
             <button
               onClick={closePopup}
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
+              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 transition duration-300 text-2xl w-10 h-10 flex items-center justify-center"
             >
-              &times;
+              ✖
             </button>
           </div>
         </div>

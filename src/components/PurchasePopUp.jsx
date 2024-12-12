@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect  } from 'react';
 import Modal from './ModalForm'; // Modal yang ada di sistem Anda
+import { fetchForums, fetchTeacher, fetchRating,  fetchCheckout } from '../services/apiService';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -7,9 +8,34 @@ const PurchasePopup = ({ forum, isOpen, onClose, popupData }) => {
   const [bank, setBank] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState("");
+  const [teacher, setTeacher] = useState(null);
+  const [rating, setRating] = useState(null);
+        
+  // Fetch teacher and rating data when the component is mounted or when the forum changes
+  useEffect(() => {
+    const fetchData = async () => {
+      if (forum) {
+        try {
+          // Fetch rating
+          const ratingData = await fetchRating(forum.id);
+          setRating(ratingData.averageRating);
+          
+          // Fetch teacher
+          const teacherData = await fetchTeacher(forum.teacher_id);
+          setTeacher(teacherData.data);
 
+          forum.teacher_name = teacherData.data.username;
+          forum.rating = ratingData.averageRating;
+        } catch (error) {
+          console.error("Failed to fetch teacher or rating data", error);
+        }
+      }
+    };
+    fetchData();
+  }, [forum]);
+  console.log(teacher)
   // Fungsi untuk memproses pembelian
-  const handlePurchase = async (e) => {
+  const handlePurchase = (e) => {
     e.preventDefault();
     setModalContent(
       `Are you sure you want to purchase the course "${forum.name}" for Rp ${parseFloat(forum.price).toLocaleString("id-ID", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} with ${bank}?`
@@ -45,8 +71,7 @@ const PurchasePopup = ({ forum, isOpen, onClose, popupData }) => {
     } finally {
       setIsModalOpen(true);
     }
-  };
-
+  };  
   return (
     <div>
       {isOpen && (
@@ -66,6 +91,9 @@ const PurchasePopup = ({ forum, isOpen, onClose, popupData }) => {
                   </p>
                   <p className="text-gray-700">
                     <span className="font-medium">Description:</span> {forum.description}
+                  </p>
+                  <p className="text-gray-700">
+                    <span className="font-medium">Rating:</span> {forum.rating}⭐
                   </p>
                   <p className="text-gray-700">
                     <span className="font-medium">Price:</span> Rp{" "}
@@ -112,6 +140,9 @@ const PurchasePopup = ({ forum, isOpen, onClose, popupData }) => {
                   </p>
                   <p className="text-gray-700">
                     <span className="font-medium">Description:</span> {forum.description}
+                  </p>
+                  <p className="text-gray-700">
+                    <span className="font-medium">Rating:</span> {forum.rating}⭐
                   </p>
                   <p className="text-gray-700">
                     <span className="font-medium">Price:</span> Rp{" "}

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Selesai from '../assets/Selesai.png'; // Gambar button Selesai
 import BelumBayar from '../assets/BelumBayar.png'; // Gambar button Belum Bayar
+import { Link } from 'react-router-dom';
 import './Forum.css'; // Import file CSS
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -40,7 +41,17 @@ const Forum = ({ forum }) => {
      <div className="course-card border border-gray-200 rounded-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-in-out p-4 flex flex-col" style={{ aspectRatio: '6/5' }}>
         <img src={`${BASE_URL}/${forum.picture}`} alt={forum.name} className="w-full h-40 object-cover rounded-lg mb-4 transform transition-all duration-500 ease-in-out" />
         <div className="flex justify-between items-center mb-2">
-          <h2 className="course-title">{forum.name}</h2>
+          <h2 
+          className="course-title"
+          style={{ 
+            maxWidth: '80%',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}
+          >
+            {forum.name}
+          </h2>
           <p className="text-yellow-500 text-sm text-lg">{forum.rating} ⭐</p>
         </div>
         <p className="text-md mb-2">{forum.price} / meet</p>
@@ -87,12 +98,13 @@ const Forum = ({ forum }) => {
                     <span className="font-medium">Rating:</span> {forum.rating} ⭐
                   </p>
                 </div>
-                <button
-                  onClick={() => alert('Join Button Clicked')} // Replace with your function to navigate to the forum
-                  className="w-full bg-green-600 text-white font-medium py-3 rounded-lg shadow hover:bg-green-700 transition duration-300"
-                >
-                  Go to Forum
-                </button>
+                <Link to={`/forum/${forum.id_forum}`}>
+                  <button
+                    className="w-full bg-green-600 text-white font-medium py-3 rounded-lg shadow hover:bg-green-700 transition duration-300"
+                  >
+                    Go to Forum
+                  </button>
+                </Link>
               </div>            
             ) : popupData.status === 'pending' ? (
               <div className="space-y-4">

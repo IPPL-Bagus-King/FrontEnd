@@ -133,8 +133,8 @@ const CreateForum = () => {
             <button
               type="submit"
               className={`${
-                loading ? 'bg-gray-400' : 'bg-orange-500'
-              } text-white hover:bg-orange-600 transition duration-300 px-4 py-2 rounded-md ml-2`}
+                loading ? 'bg-gray-400' : 'bg-[#ffa726]'
+              } text-white hover:bg-[#ffb951] transition duration-300 px-4 py-2 rounded-md ml-2`}
               disabled={loading}
             >
               {loading ? 'Menyimpan...' : 'Simpan'}

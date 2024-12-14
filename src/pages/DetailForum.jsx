@@ -28,7 +28,7 @@ const DetailForum = () => {
   }, []);
 
   return (
-    <div className="p-6">
+    <div className="p-6 mb-20">
       {/* Navbar Kecil */}
       <div
         className={`bg-[#FFA726] p-4 flex items-center justify-between fixed top-0 left-0 right-0 rounded-b-xl shadow-lg transition-opacity duration-120 ${

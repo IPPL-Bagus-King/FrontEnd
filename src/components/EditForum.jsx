@@ -1,22 +1,36 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Modal from './ModalForm';
-import LogoAdd from '../assets/LogoAdd.png';
-import { createForum } from '../services/apiService';
+import Pencil from '../assets/pencil.png';
+import { editForum, fetchForumById } from '../services/apiService';
 
-
-const CreateForum = () => {
+const EditForum = ({ forumId }) => {
   const [isModalOpen, setIsModalOpen] = useState(false); // State untuk modal
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     price: '',
   }); // State untuk form data
+  const [originalData, setOriginalData] = useState(null); // State untuk menyimpan data asli
   const [loading, setLoading] = useState(false); // State untuk loading
   const [error, setError] = useState(''); // State untuk error
 
-  const handleOpenModal = () => {
+  const handleOpenModal = async () => {
     setIsModalOpen(true);
+    setError(''); // Reset error
+    try {
+      const token = localStorage.getItem('token'); // Ambil token dari localStorage
+      const forum = await fetchForumById(forumId, token); // Panggil API untuk mendapatkan data forum
+      setOriginalData(forum.data); // Simpan data asli
+      setFormData({
+        name: forum.data.name || '',
+        description: forum.data.description || '',
+        price: forum.data.price || '',
+      });
+    } catch (error) {
+      console.error('Error fetching forum data:', error);
+      setError('Gagal memuat data forum. Silakan coba lagi.');
+    }
   };
 
   const handleCloseModal = () => {
@@ -26,15 +40,16 @@ const CreateForum = () => {
       description: '',
       price: '',
     });
+    setOriginalData(null); // Reset data asli
     setError('');
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -42,21 +57,26 @@ const CreateForum = () => {
     setLoading(true);
     setError('');
 
+    // Cek apakah data berubah
+    if (
+      originalData &&
+      formData.name === originalData.name &&
+      formData.description === originalData.description &&
+      formData.price === originalData.price
+    ) {
+      setError('Tidak ada perubahan yang dilakukan.');
+      setLoading(false);
+      return;
+    }
+
     try {
       const token = localStorage.getItem('token'); // Ambil token dari localStorage
-      const result = await createForum(formData, token); // Panggil createForum dari apiService
-
-      // Tutup modal dan reset form setelah sukses
-      setIsModalOpen(false);
-      setFormData({
-        name: '',
-        description: '',
-        price: '',
-      });
-      window.location.reload();
+      await editForum(forumId, formData, token); // Panggil API untuk edit forum
+      handleCloseModal(); // Tutup modal
+      window.location.reload(); // Reload halaman
     } catch (error) {
-      console.error('Error creating forum:', error);
-      setError('Gagal membuat forum. Silakan coba lagi.');
+      console.error('Error editing forum:', error);
+      setError('Gagal merubah forum. Silakan coba lagi.');
     } finally {
       setLoading(false);
     }
@@ -64,18 +84,17 @@ const CreateForum = () => {
 
   return (
     <>
-      {/* Add Button */}
+      {/* Edit Button */}
       <motion.img
-        src={LogoAdd}
-        alt="Add Button"
+        src={Pencil}
+        alt="Edit Button"
         onClick={handleOpenModal}
-        style={{ width: '130px' }}
-        className="cursor-pointer fixed bottom-10 right-10 z-50 "
+        className="w-20 cursor-pointer fixed bottom-10 right-10 z-50 bg-[#FFA726] p-4 rounded-full shadow-md hover:bg-[#FF9800]"
         whileHover={{ scale: 1.07 }}
-        />
+      />
 
       {/* Modal Popup */}
-      <Modal isOpen={isModalOpen} onClose={handleCloseModal} title="Buat Forum">
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal} title="Edit Forum">
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">
@@ -146,4 +165,4 @@ const CreateForum = () => {
   );
 };
 
-export default CreateForum;
+export default EditForum;

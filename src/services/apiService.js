@@ -7,6 +7,19 @@ export const fetchForums = async () => {
     return response.json();
   };
 
+// fetch forum by its id
+export const fetchForumById = async (forumId, token) => {
+  const response = await fetch(`${BASE_URL}/forum/${forumId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) throw new Error(`Failed to fetch forum with id ${forumId}: ${response.statusText}`);
+  return response.json();
+}
+
 // Fetch forums by teacher id and combine data
 export const fetchForumsByTeacherId = async (teacherId, token) => {
   const response = await fetch(`${BASE_URL}/forum/teacher-forums/${teacherId}`, {
@@ -176,4 +189,46 @@ export const fetchCheckout = async (forumId) => {
     return 'not_found'; // Jika terjadi error, kembalikan 'not_found'
   }
 
+};
+
+export const editForum = async (forumId, formData, token) => {
+  try {
+    const response = await fetch(`${BASE_URL}/forum/${forumId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(formData),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to update forum: ${response.statusText}`);
+    }
+
+    return await response.json(); // Kembalikan data forum yang baru diedit
+  } catch (error) {
+    console.error('Error updating forum:', error);
+    throw error; // Re-throw error supaya bisa ditangani di komponen
+  }
+};
+
+export const deleteForum = async (forumId, token) => {
+  try {
+    const response = await fetch(`${BASE_URL}/forum/${forumId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Gagal menghapus forum');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting forum:', error);
+    throw error; // Re-throw the error to be handled in the component
+  }
 };

@@ -5,7 +5,7 @@ import Backbutton from '../assets/ButtonKembali.png';
 import Join from '../assets/JoinButton.png'; // Gambar button Join
 import Pencil from '../assets/pencil.png'; // Gambar pensil
 import { motion } from 'framer-motion';
-import PurchasePopup from './PurchasePopup'; // Pastikan komponen ini sudah ada
+import PurchasePopup from './PurchasePopUp'; // Pastikan komponen ini sudah ada
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -143,7 +143,7 @@ const ForumDetail = () => {
 
   return (
     <motion.div
-      className="p-6 space-y-4"
+      className="p-6 space-y-4 mt-2" // Butuh margin?
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -171,7 +171,7 @@ const ForumDetail = () => {
       {/* Main Content with Two Columns */}
       <div className="mt-6 flex gap-6 w-full max-w-screen-lg">
         {/* Left Column */}
-        <div className="w-1/4 min-w-[180px] max-w-[300px] space-y-4">
+        <div className="w-1/4 min-w-[290px] max-w-[300px] space-y-4">
           {/* ID Forum Section */}
           <div className="bg-white p-4 rounded-md shadow-md">
             <h3 className="text-xl font-semibold">ID Forum</h3>
@@ -186,31 +186,32 @@ const ForumDetail = () => {
                 Rp. {new Intl.NumberFormat('id-ID', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(forum.price || 0)}
               </p>
             </div>
-
-            <button
-              onClick={() => {
-                if (checkoutData?.data?.status === "settlement") {
-                  handleDaftarClick("settlement");
-                } else if (checkoutData?.data?.status === "pending") {
-                  handleDaftarClick("pending");
-                } else {
-                  handleDaftarClick("default");
-                }
-              }}
-              className={`mt-4 py-1 px-3 rounded-md text-white text-sm font-poppins transform transition-all hover:scale-105 ${
-                checkoutData?.data?.status === "settlement"
-                  ? "bg-[#5cb85c] cursor-pointer"
+            <div className="grid justify-items-end">
+              <button
+                onClick={() => {
+                  if (checkoutData?.data?.status === "settlement") {
+                    handleDaftarClick("settlement");
+                  } else if (checkoutData?.data?.status === "pending") {
+                    handleDaftarClick("pending");
+                  } else {
+                    handleDaftarClick("default");
+                  }
+                }}
+                className={`mt-4 py-1 px-3 rounded-md text-white text-sm font-poppins transform transition-all hover:scale-105 ${
+                  checkoutData?.data?.status === "settlement"
+                    ? "bg-[#5cb85c] cursor-pointer"
+                    : checkoutData?.data?.status === "pending"
+                    ? "bg-[#fcd53f] cursor-pointer"
+                    : "bg-[#FFA726] hover:bg-[#FF9800] cursor-pointer"
+                }`}
+              >
+                {checkoutData?.data?.status === "settlement"
+                  ? "Telah Bergabung"
                   : checkoutData?.data?.status === "pending"
-                  ? "bg-[#fcd53f] cursor-pointer"
-                  : "bg-[#FFA726] hover:bg-[#FF9800] cursor-pointer"
-              }`}
-            >
-              {checkoutData?.data?.status === "settlement"
-                ? "Telah Bergabung"
-                : checkoutData?.data?.status === "pending"
-                ? "Menunggu Pembayaran"
-                : "Daftar Sekarang"}
-            </button>
+                  ? "Menunggu Pembayaran"
+                  : "Daftar Sekarang"}
+              </button>
+            </div>
           </div>
 
 
@@ -281,14 +282,14 @@ const ForumDetail = () => {
             </div>
 
           {/* Recommended Forums */}
-          <div className="bg-white p-4 rounded-md shadow-md">
-            <h3 className="text-xl font-semibold mb-4">Forum Lainnya</h3>
-            <div className="flex space-x-4 overflow-x-auto scrollbar-hide">
+          <div className="bg-white p-4 rounded-md shadow-md max-w-screen-xl mx-auto overflow-hidden">
+            <h3 className="text-xl font-semibold">Forum Lainnya</h3>
+            <div className="flex space-x-4 overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-mandatory p-4">
               {relatedForums.length > 0 ? (
                 relatedForums.map((relatedForum) => (
                   <motion.div
                     key={relatedForum.id}
-                    className="flex-shrink-0 w-96 p-4 bg-gray-100 rounded-md shadow-md relative"
+                    className="flex-shrink-0 w-96 p-4 bg-gray-100 rounded-md shadow-md relative snap-center"
                     whileHover={{ scale: 1.05 }} // Hover animation
                     transition={{ type: 'spring', stiffness: 200, damping: 10 }}
                   >

@@ -563,7 +563,17 @@ const LandingPage = () => {
                 className="w-full h-40 object-cover rounded-lg mb-4"
               />
               <div className="flex justify-between items-center mb-2">
-                <h2 className="text-2xl font-semibold text-gray-800">{course.name}</h2>
+                <h2 
+                className="text-2xl font-semibold text-gray-800"
+                style={{ 
+                  maxWidth: '80%',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+                >
+                  {course.name}
+                </h2>
                 <p className="text-yellow-500 text-lg">{course.rating} ⭐</p>
               </div>
               <p className="text-md mb-2">

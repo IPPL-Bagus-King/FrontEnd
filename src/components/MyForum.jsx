@@ -11,7 +11,17 @@ const Forum = ({ forum }) => {
     <div className="course-card border border-gray-200 rounded-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 ease-in-out p-4 flex flex-col" style={{ aspectRatio: '6/5' }}>
       <img src={`${BASE_URL}/${forum.picture}`} alt={forum.name} className="w-full h-40 object-cover rounded-lg mb-4 transform transition-all duration-500 ease-in-out" />
       <div className="flex justify-between items-center mb-2">
-        <h2 className="course-title">{forum.name}</h2>
+        <h2 
+        className="course-title"
+        style={{ 
+          maxWidth: '80%',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        }}
+        >
+          {forum.name}
+        </h2>
         <p className="text-yellow-500 text-sm text-lg">{forum.rating} ⭐</p>
       </div>
       <p className="text-md mb-2">Rp {forum.price} / meet</p>

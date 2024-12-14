@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
+import { AuthContext } from '../context/AuthContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchForums, fetchTeacher, fetchRating,  fetchCheckout } from '../services/apiService';
 import Backbutton from '../assets/ButtonKembali.png';
 import Join from '../assets/JoinButton.png'; // Gambar button Join
-import Pencil from '../assets/pencil.png'; // Gambar pensil
+import EditForum from '../components/EditForum';
 import { motion } from 'framer-motion';
 import PurchasePopup from './PurchasePopUp'; // Pastikan komponen ini sudah ada
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const ForumDetail = () => {
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const { id } = useParams();
   const [forum, setForum] = useState(null);
@@ -105,12 +107,9 @@ const ForumDetail = () => {
         const teacherData = await fetchTeacher(forumData.teacher_id);
         setTeacher(teacherData.data);
 
-        console.log("Forum ID:", forumData.id);
         // Fetch checkout data
         const checkoutResponse = await fetchCheckout(forumData.id);
         setCheckoutData(checkoutResponse);
-        console.log("CHECKOUT", checkoutResponse);
-        //console.log("CONSOLE", checkoutData);
 
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -123,10 +122,6 @@ const ForumDetail = () => {
     getForumData();
     
   }, [id]);
-
-  const handleEditClick = () => {
-    console.log('Edit button clicked');
-  };
 
   if (loading) {
     return (
@@ -178,7 +173,9 @@ const ForumDetail = () => {
             <p className="mt-2 text-gray-600">{forum.id}</p>
           </div>
 
+          
           {/* Harga Section */}
+          {user?.role === 'student' && (
           <div className="bg-white p-4 rounded-md shadow-md flex flex-col items-start">
             <div>
               <h3 className="text-xl font-semibold">Harga</h3>
@@ -213,7 +210,7 @@ const ForumDetail = () => {
               </button>
             </div>
           </div>
-
+          )}
 
 
           <div>
@@ -322,13 +319,12 @@ const ForumDetail = () => {
         </div>
       </div>
 
-      {/* Floating Edit Button */}
-      <button
-        onClick={handleEditClick}
-        className="fixed bottom-6 right-6 bg-[#FFA726] p-4 rounded-full shadow-md hover:bg-[#FF9800]"
-      >
-        <img src={Pencil} alt="Edit" className="w-6 h-6" />
-      </button>
+      {/* Edit Forum */}
+      {user?.role === 'teacher' && (
+      <div className="flex justify-between items-center mt-auto">
+          <EditForum forumId={forum.id}/>
+      </div>
+      )}
     </motion.div>
   );
 };

@@ -28,7 +28,6 @@ import {
   rejectTeacher,
   fetchPendingTeachers,
 } from '../services/apiService';
-import { motion } from 'framer-motion';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const DashboardPage = () => {

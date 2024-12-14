@@ -58,6 +58,23 @@ export const fetchForumsByTeacherId = async (teacherId, token) => {
   return enrichedForums;
 };
 
+// Fetch history checkout forum by forum id
+export const fetchHistoryCheckoutbyForum = async (forumId, token) => {
+  const response = await fetch(`${BASE_URL}/checkout/history-forum/${forumId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch checkout history: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
 // Fetch teacher data
 export const fetchTeacher = async (teacherId) => {
     const response = await fetch(`${BASE_URL}/users/${teacherId}`);

@@ -6,6 +6,7 @@ import MyForum from '../components/MyForum'; // Import Komponen Forum
 import CreateForum from '../components/CreateForum';
 import HistoryCheckout from '../components/HistoryCheckout'; // Import Komponen Forum
 import KelolaMentor from '../components/KelolaMentor'; // Import Komponen KelolaMentor
+import HistoryCheckoutTeacher from '../components/HistoryCheckoutTeacher'; // Import Komponen HistoryCheckoutTeacher
 import SignOutIcon from '../assets/SignOut.png'; // Logo SignOut
 import Search from '../assets/search.png';
 import Filter from '../assets/filter.png';
@@ -27,6 +28,7 @@ import {
   approveTeacher, 
   rejectTeacher,
   fetchPendingTeachers,
+  fetchHistoryCheckoutbyForum
 } from '../services/apiService';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -51,96 +53,129 @@ const DashboardPage = () => {
 
   // Fetch history checkout
   const fetchHistoryCheckout = async () => {
-    try {
-      const response = await fetch(`${BASE_URL}/checkout/history`, {
-        method: 'GET',
-        headers: {
-          'content-type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch checkout history: ${response.statusText}`);
+    if (user?.role === 'teacher') {
+      try {
+        const token = localStorage.getItem('token');
+        const data = await fetchForumsByTeacherId(user?.id, token);
+        const forumIds = data.map((forum) => forum.id);
+      
+        // Loop semua forum ID untuk mendapatkan history checkout
+        const historyCheckout = await Promise.all(
+          forumIds.map(async (forumId) => {
+            const response = await fetchHistoryCheckoutbyForum(forumId, token);
+            return response.data && response.data.length > 0 ? response.data : null;
+          })
+        );
+      
+        // Gabungkan hasil dari semua forum dan filter nilai null
+        const mergedHistoryCheckout = historyCheckout.filter(Boolean).flat();
+      
+        // Tambahkan properti `name` ke setiap transaksi
+        const updatedHistoryCheckout = mergedHistoryCheckout.map((transaction) => ({
+          ...transaction,
+          name: transaction.forum.name, // Menambahkan properti name
+        }));
+      
+        console.log(updatedHistoryCheckout); // Debug untuk memastikan hasil benar
+      
+        // Set hasil akhir ke state
+        setHistoryCheckout(updatedHistoryCheckout);
+      } catch (error) {
+        console.error('Error fetching history checkout:', error);
       }
+      
+    } else {
+      try {
+        const response = await fetch(`${BASE_URL}/checkout/history`, {
+          method: 'GET',
+          headers: {
+            'content-type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
 
-      const result = await response.json();
+        if (!response.ok) {
+          throw new Error(`Failed to fetch checkout history: ${response.statusText}`);
+        }
 
-      const enrichedHistoryForums = await Promise.all(
-        result.data.map(async (forum) => {
-          try {
-            const teacherData = await fetchTeacher(forum.forum.teacher_id);
-            const ratingData = await fetchRating(forum.forum.id);
+        const result = await response.json();
 
-            return {
-              ...forum,
-              name: forum.forum.name,
-              description: forum.forum.description,
-              price: forum.forum.price,
-              picture: forum.forum.picture,
-              teacher_name: teacherData.data.username,
-              teacher_picture: teacherData.data.picture,
-              rating: ratingData.averageRating || "N/A",
-            };
-          } catch (error) {
-            console.error(`Error enriching forum with id ${forum.id}:`, error);
-            return forum;
-          }
-        })
-      );
+        const enrichedHistoryForums = await Promise.all(
+          result.data.map(async (forum) => {
+            try {
+              const teacherData = await fetchTeacher(forum.forum.teacher_id);
+              const ratingData = await fetchRating(forum.forum.id);
 
-      setHistoryCheckout(enrichedHistoryForums); 
-      const forumHistory = await Promise.all(
-        enrichedHistoryForums.map(async (forum) => {
-          try {
-            if (forum.status !== 'settlement') {
+              return {
+                ...forum,
+                name: forum.forum.name,
+                description: forum.forum.description,
+                price: forum.forum.price,
+                picture: forum.forum.picture,
+                teacher_name: teacherData.data.username,
+                teacher_picture: teacherData.data.picture,
+                rating: ratingData.averageRating || "N/A",
+              };
+            } catch (error) {
+              console.error(`Error enriching forum with id ${forum.id}:`, error);
+              return forum;
+            }
+          })
+        );
+
+        setHistoryCheckout(enrichedHistoryForums); 
+        const forumHistory = await Promise.all(
+          enrichedHistoryForums.map(async (forum) => {
+            try {
+              if (forum.status !== 'settlement') {
+                return null;
+              }
+
+              const response = await fetch(`${BASE_URL}/forum/${forum.id_forum}`,
+                {
+                  method: 'GET',
+                  headers: {
+                    'content-type': 'application/json',
+                    Authorization: `Bearer ${localStorage.getItem('token')}`,
+                  },
+                }
+              );
+              if (!response.ok) {
+                throw new Error(`Failed to fetch forum with id ${forum.id_forum}`);
+              }
+              const result = await response.json();
+              return result.data;
+            } catch (error) {
+              console.error(`Error fetching forum with id ${forum.id_forum}:`, error);
               return null;
             }
+          })
+        );
+        
+        const filteredForumHistory = forumHistory.filter((forum) => forum !== null);
 
-            const response = await fetch(`${BASE_URL}/forum/${forum.id_forum}`,
-              {
-                method: 'GET',
-                headers: {
-                  'content-type': 'application/json',
-                  Authorization: `Bearer ${localStorage.getItem('token')}`,
-                },
-              }
-            );
-            if (!response.ok) {
-              throw new Error(`Failed to fetch forum with id ${forum.id_forum}`);
+        const enrichedForums = await Promise.all(
+          filteredForumHistory.map(async (forum) => {
+            try {
+              const teacherData = await fetchTeacher(forum.teacher_id);
+              const ratingData = await fetchRating(forum.id);
+              return {
+                ...forum,
+                teacher_name: teacherData.data.username,
+                teacher_picture: teacherData.data.picture,
+                rating: ratingData.averageRating || "N/A",
+              };
+            } catch (error) {
+              console.error(`Error enriching forum with id ${forum.id}:`, error);
+              return forum;
             }
-            const result = await response.json();
-            return result.data;
-          } catch (error) {
-            console.error(`Error fetching forum with id ${forum.id_forum}:`, error);
-            return null;
-          }
-        })
-      );
-      
-      const filteredForumHistory = forumHistory.filter((forum) => forum !== null);
+          })
+        );
 
-      const enrichedForums = await Promise.all(
-        filteredForumHistory.map(async (forum) => {
-          try {
-            const teacherData = await fetchTeacher(forum.teacher_id);
-            const ratingData = await fetchRating(forum.id);
-            return {
-              ...forum,
-              teacher_name: teacherData.data.username,
-              teacher_picture: teacherData.data.picture,
-              rating: ratingData.averageRating || "N/A",
-            };
-          } catch (error) {
-            console.error(`Error enriching forum with id ${forum.id}:`, error);
-            return forum;
-          }
-        })
-      );
-
-      setForumsHistory(enrichedForums);
-    } catch (error) {
-      console.error("Error fetching history checkout:", error);
+        setForumsHistory(enrichedForums);
+      } catch (error) {
+        console.error("Error fetching history checkout:", error);
+      }
     }
   };
 
@@ -177,8 +212,8 @@ const DashboardPage = () => {
     const fetchAllData = async () => {
       if (user?.role !== 'teacher') {
         await fetchData();
-        await fetchHistoryCheckout();
       }
+      await fetchHistoryCheckout();
     };
     fetchAllData();
   }, []);
@@ -283,8 +318,8 @@ const handleReject = async (teacherId) => {
         return (
           <div>
               {filteredTeacherForums.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-gray-600">
-                    <p>Anda belum memiliki forum.</p>
+                <div className="flex justify-center items-center h-full py-48">
+                  <img src={NotFound} alt="Not Found" className="w-72" />
                 </div>
             ) : (
           <div className="grid grid-cols-3 gap-6">
@@ -306,14 +341,20 @@ const handleReject = async (teacherId) => {
                   <img src={NotFound} alt="Not Found" className="w-72" />
                 </div>
               ) : (
-                <div className="grid grid-cols-3 gap-6">
+                <div
+                  className={`grid ${user?.role === 'teacher' ? 'grid-cols-4' : 'grid-cols-3'} gap-6`}
+                >
                   {filteredHistoryCheckout.slice().reverse().map((transaction) => (
-                    <HistoryCheckout key={transaction.id} forum={transaction} />
+                    user?.role === 'teacher' ? (
+                      <HistoryCheckoutTeacher key={transaction.id} forum={transaction} />
+                    ) : (
+                      <HistoryCheckout key={transaction.id} forum={transaction} />
+                    )
                   ))}
                 </div>
               )}
             </div>
-          );
+          );          
         case 'kelolaMentor':
           return (
             <div>
@@ -368,6 +409,7 @@ const handleReject = async (teacherId) => {
         setFilteredHistoryCheckout(historyCheckout.filter((transaction) =>
           transaction.name.toLowerCase().includes(searchQuery)
         ));
+          
         break;
       case 'kelolaMentor':
         setFilteredPendingTeachers(pendingTeachers.data.filter((teacher) =>

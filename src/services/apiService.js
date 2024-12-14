@@ -232,3 +232,25 @@ export const deleteForum = async (forumId, token) => {
     throw error; // Re-throw the error to be handled in the component
   }
 };
+
+export const uploadMaterial = async (forumId, formData, token) => {
+  try {
+    console.log(formData)
+    const response = await fetch(`${BASE_URL}/forum/${forumId}/materials`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+  if (!response.ok) {
+    throw new Error('Gagal upload materi!');
+  }
+
+  return await response.json();
+  } catch (error) {
+    console.error('Error uploading material:', error);
+    throw error;
+  }
+};

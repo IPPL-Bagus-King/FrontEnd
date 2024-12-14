@@ -3,8 +3,10 @@ import { AuthContext } from '../context/AuthContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchForums, fetchTeacher, fetchRating,  fetchCheckout } from '../services/apiService';
 import Backbutton from '../assets/ButtonKembali.png';
-import Join from '../assets/JoinButton.png'; // Gambar button Join
+import Join from '../assets/JoinButton.png';
+import Upload from '../assets/UploadButton.png';
 import EditForum from '../components/EditForum';
+import UploadMaterial from '../components/UploadMaterial';
 import { motion } from 'framer-motion';
 import PurchasePopup from './PurchasePopup'; // Pastikan komponen ini sudah ada
 
@@ -228,6 +230,9 @@ const ForumDetail = () => {
           {/* List Materi */}
           <div className="bg-white p-4 rounded-md shadow-md flex-grow">
             <h3 className="text-xl font-semibold">List Materi</h3>
+            {user?.role === 'teacher' && (
+            <UploadMaterial forumId={forum.id} />
+            )}
             <p className="mt-2 text-gray-400">{forum.materi || 'Materi belum tersedia'}</p>
           </div>
         </div>

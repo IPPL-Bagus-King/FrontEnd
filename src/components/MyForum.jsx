@@ -85,7 +85,7 @@ const Forum = ({ forum }) => {
             src={Trash}
             alt="Delete Button"
             onClick={handleDelete}
-            className="w-12 cursor-pointer bg-red-500 p-3 rounded-full shadow-md hover:bg-red-600 transition-all duration-300"
+            className="w-11 cursor-pointer bg-red-500 p-3 rounded-full shadow-md hover:bg-red-600"
             whileHover={{ scale: 1.1 }}
           />
         )}

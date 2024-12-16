@@ -6,6 +6,7 @@ import Backbutton from '../assets/ButtonKembali.png';
 import Join from '../assets/JoinButton.png';
 import Trash from '../assets/Trash.png';
 import EditForum from '../components/EditForum';
+import DeleteForum from '../assets/delete.png';
 import UploadMaterial from '../components/UploadMaterial';
 import { motion } from 'framer-motion';
 import PurchasePopup from './PurchasePopUp'; // Pastikan komponen ini sudah ada
@@ -30,7 +31,11 @@ const ForumDetail = () => {
   // Checkout state
   const [checkoutData, setCheckoutData] = useState(null);
   const [isPopupVisible, setIsPopupVisible] = useState(false); // State untuk popup
+  const [openIndex, setOpenIndex] = useState(null);
 
+  const toggleMaterial = (index) => {
+    setOpenIndex(openIndex === index ? null : index);
+  };
   const handleDaftarClick = (status) => {
     if (status === "settlement") {
       setPopupData({ status: "settlement" });
@@ -328,57 +333,78 @@ const ForumDetail = () => {
             </div>
 
           {/* List Materi */}
-          <div className="bg-white p-4 rounded-md shadow-md">
-              <h3 className="text-xl font-semibold mb-4">List Materi</h3>
-              {material.length === 0 ? (
-                <p className="text-gray-600 mt-4">Materi belum tersedia.</p>
-              ) : (
-                <ul className="space-y-4 mt-4">
-                  {material.map((item, index) => (
-                    <div key={item.id} className="border-b pb-4 mb-4 flex justify-between items-center">
-                      <div>
-                        <p className="text-lg font-medium">
-                          {index + 1}. {item.title}
-                        </p>
-                        <p className="mt-2 text-gray-600 whitespace-pre-line">{item.description}</p>
-                        <div className="mt-4">
-                          <h4 className="text-md font-semibold">Files:</h4>
-                          {item.files && item.files.length > 0 ? (
-                            <ul className="mt-2 space-y-2">
-                              {item.files.map((file, fileIndex) => (
-                                <li key={file.id}>
-                                  <span className="font-semibold">-</span>{' '}
-                                  <a
-                                    href={`${BASE_URL}/forum/files/${file.file_url}`}
-                                    download
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-orange-500 hover:underline"
-                                  >
-                                    {file.file_url}
-                                  </a>
-                                </li>
-                              ))}
-                            </ul>
-                          ) : (
-                            <p className="text-sm text-gray-500">No files available</p>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* tombol hapus materi di kanan */}
-                      <motion.img
-                        src={Trash}
-                        alt="Delete Button"
-                        onClick={() => handleDeleteMaterial(item.id)}
-                        className="w-12 cursor-pointer bg-red-500 p-3 rounded-full shadow-md hover:bg-red-600 transition-all duration-300"
-                        whileHover={{ scale: 1.1 }}
-                      />
-                    </div>
-                  ))}
-                </ul>
-              )}
-          </div>
+          {/* Tampilkan List Materi hanya jika kondisi terpenuhi */}
+          {(checkoutData?.data?.status === "settlement" || user?.role === "teacher") && (
+               <div className="bg-white p-4 rounded-md shadow-md">
+               <h3 className="text-xl font-semibold mb-4">List Materi</h3>
+               {material.length === 0 ? (
+                 <p className="text-gray-600 mt-4">Materi belum tersedia.</p>
+               ) : (
+                 <ul className="space-y-4 mt-4">
+                   {material.map((item, index) => (
+                     <div key={item.id} className="border rounded-md shadow-sm">
+                       {/* Header Materi */}
+                       <div
+                         className="flex justify-between items-center p-4 cursor-pointer hover:bg-gray-100 rounded-md"
+                         onClick={() => toggleMaterial(index)}
+                       >
+                         <p className="text-lg font-semibold">
+                           {index + 1}. {item.title}
+                         </p>
+                         <span className="text-gray-500">
+                           {openIndex === index ? "▲" : "▼"}
+                         </span>
+                       </div>
+         
+                       {/* Konten Materi */}
+                       {openIndex === index && (
+                         <div className="p-4 bg-gray-50 rounded-b-md">
+                           <p className="text-gray-600 whitespace-pre-line mb-4">
+                             {item.description}
+                           </p>
+                           <div>
+                             <h4 className="text-md font-semibold mb-2">Files:</h4>
+                             {item.files && item.files.length > 0 ? (
+                               <ul className="list-disc ml-5 space-y-2">
+                                 {item.files.map((file) => (
+                                   <li key={file.id}>
+                                     <a
+                                       href={`${BASE_URL}/forum/files/${file.file_url}`}
+                                       download
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       className="text-orange-500 hover:underline"
+                                     >
+                                       {file.file_url.split("\\").pop()} {/* Tampilkan judul file saja */}
+                                     </a>
+                                   </li>
+                                 ))}
+                               </ul>
+                             ) : (
+                               <p className="text-sm text-gray-500">No files available</p>
+                             )}
+                           </div>
+                         </div>
+                       )}
+         
+                       {/* Tombol Hapus (hanya untuk role "teacher") */}
+                       {user?.role === "teacher" && (
+                         <div className="flex justify-end p-4">
+                           <motion.img
+                             src={DeleteForum}
+                             alt="Delete Button"
+                             onClick={() => handleDeleteMaterial(item.id)}
+                             className="w-24 cursor-pointer rounded-full shadow-md hover:bg-red-600 "
+                             whileHover={{ scale: 1.1 }}
+                           />
+                         </div>
+                       )}
+                     </div>
+                   ))}
+                 </ul>
+               )}
+             </div>
+          )}
 
           {/* Recommended Forums */}
           <div className="bg-white p-4 rounded-md shadow-md max-w-screen-xl mx-auto overflow-hidden">

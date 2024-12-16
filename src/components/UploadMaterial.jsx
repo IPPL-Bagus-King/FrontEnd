@@ -147,7 +147,7 @@ const UploadMaterial = ({ forumId }) => {
                   Drag and drop files here or{' '}
                   <label
                     htmlFor="files"
-                    className="text-orange-500 cursor-pointer"
+                    className="text-[#ffa726] cursor-pointer"
                   >
                     browse
                   </label>
@@ -178,7 +178,7 @@ const UploadMaterial = ({ forumId }) => {
                 type="button"
                 onClick={handleSubmit}
                 className={`px-4 py-2 rounded-md shadow-md text-white transition-all duration-300 ${
-                  loading ? 'bg-gray-400' : 'bg-orange-500 hover:bg-orange-600'
+                  loading ? 'bg-gray-400' : 'bg-[#ffa726] hover:bg-[#ffb951]'
                 }`}
                 disabled={loading}
               >

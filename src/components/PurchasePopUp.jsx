@@ -10,6 +10,7 @@ const PurchasePopup = ({ forum, isOpen, onClose, popupData }) => {
   const [modalContent, setModalContent] = useState("");
   const [teacher, setTeacher] = useState(null);
   const [rating, setRating] = useState(null);
+  const [isPurchaseButtonVisible, setIsPurchaseButtonVisible] = useState(true);
         
   // Fetch teacher and rating data when the component is mounted or when the forum changes
   useEffect(() => {
@@ -33,7 +34,7 @@ const PurchasePopup = ({ forum, isOpen, onClose, popupData }) => {
     };
     fetchData();
   }, [forum]);
-  console.log(teacher)
+
   // Fungsi untuk memproses pembelian
   const handlePurchase = (e) => {
     e.preventDefault();
@@ -52,6 +53,7 @@ const PurchasePopup = ({ forum, isOpen, onClose, popupData }) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
+        
         body: JSON.stringify({
           id_product: forum.id,
           bank: bank,
@@ -60,18 +62,22 @@ const PurchasePopup = ({ forum, isOpen, onClose, popupData }) => {
 
       if (response.ok) {
         const paymentDetails = await response.json();
+        console.log(paymentDetails);  
         setModalContent(
           `Purchase successful! Please complete your payment. ${bank} Virtual Account: ${paymentDetails.data.va_number}`
         );
+        setIsPurchaseButtonVisible(false);
       } else {
         setModalContent("Failed to process your purchase. Please try again.");
+        setIsPurchaseButtonVisible(false);
       }
     } catch (error) {
       setModalContent("Something went wrong. Please try again later.");
+      setIsPurchaseButtonVisible(false);
     } finally {
       setIsModalOpen(true);
     }
-  };  
+  };
   return (
     <div>
       {isOpen && (
@@ -169,11 +175,42 @@ const PurchasePopup = ({ forum, isOpen, onClose, popupData }) => {
                   <button
                     type="submit"
                     disabled={!bank}
+                    onClick={() => setIsPurchaseButtonVisible(true)}
                     className={`w-full ${!bank ? 'bg-gray-400' : 'bg-blue-600'} text-white font-medium py-3 rounded-lg shadow hover:bg-blue-700 transition duration-300`}
                   >
                     Purchase
                   </button>
                 </form>
+                <Modal
+                  isOpen={isModalOpen}
+                  onClose={() => {
+                    window.location.reload();
+                  }}              
+                  title="Purchase Confirmation"
+                >
+                  <p>{modalContent}</p>
+                    <div className="mt-4 flex justify-end">
+                      {isPurchaseButtonVisible && (
+                        <>
+                          <button
+                            onClick={() => window.location.reload()}
+                            className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg mr-2 hover:bg-gray-400"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={() => {
+                              confirmPurchase();
+                            }}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                          >
+                            Confirm
+                          </button>
+                        </>
+                      )}
+                    </div>
+                </Modal>            
+
               </div>
             )}
             <button

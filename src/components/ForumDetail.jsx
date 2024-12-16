@@ -1,14 +1,15 @@
 import React, { useEffect, useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate, useParams } from 'react-router-dom';
-import { fetchForums, fetchTeacher, fetchRating,  fetchCheckout } from '../services/apiService';
+import { fetchForums, fetchTeacher, fetchRating,  fetchCheckout, fetchMaterial, deleteMaterial } from '../services/apiService';
 import Backbutton from '../assets/ButtonKembali.png';
 import Join from '../assets/JoinButton.png';
-import Upload from '../assets/UploadButton.png';
+import Trash from '../assets/Trash.png';
 import EditForum from '../components/EditForum';
 import UploadMaterial from '../components/UploadMaterial';
 import { motion } from 'framer-motion';
 import PurchasePopup from './PurchasePopUp'; // Pastikan komponen ini sudah ada
+import Swal from 'sweetalert2';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
@@ -19,10 +20,10 @@ const ForumDetail = () => {
   const [forum, setForum] = useState(null);
   const [teacher, setTeacher] = useState(null);
   const [rating, setRating] = useState(null);
+  const [material, setMaterial] = useState([]);
   const [relatedForums, setRelatedForums] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
 
   const [popupData, setPopupData] = useState({});
 
@@ -85,6 +86,48 @@ const ForumDetail = () => {
     return `${years} tahun ${remainingMonths} bulan`; // Tampilkan tahun dan sisa bulan
   };
 
+  const handleDeleteMaterial = async (materialId) => {
+    // Tampilkan konfirmasi SweetAlert
+    await Swal.fire({
+      title: "Apakah anda yakin ingin menghapus materi?",
+      text: "Anda tidak bisa mengembalikan forum yang sudah dihapus!",
+      icon: "warning",
+      showCancelButton: true,
+      customClass: {
+        confirmButton: 'custom-ok-button',
+      },
+      confirmButtonText: "Ya, hapus materi!"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteMaterial(materialId)
+          .then(() => {
+            // Tampilkan Swal notifikasi sukses
+            Swal.fire({
+              title: "Terhapus!",
+              text: "Materi berhasil dihapus.",
+              icon: 'success',
+              customClass: {
+                confirmButton: 'custom-ok-button',
+              },
+            }).then(() => {
+              // Reload halaman setelah konfirmasi
+              window.location.reload();
+            });
+          })
+          .catch((error) => {
+            // Jika terjadi kesalahan saat menghapus materi
+            Swal.fire({
+              title: "Gagal menghapus!",
+              text: "Terjadi kesalahan saat menghapus materi.",
+              icon: 'error',
+              customClass: {
+                confirmButton: 'custom-ok-button',
+              },
+            });
+          });
+      }
+    });
+  };
 
   useEffect(() => {
     const getForumData = async () => {
@@ -112,6 +155,10 @@ const ForumDetail = () => {
         // Fetch checkout data
         const checkoutResponse = await fetchCheckout(forumData.id);
         setCheckoutData(checkoutResponse);
+
+        // Fetch material
+        const materialResponse = await fetchMaterial(forumData.id);
+        setMaterial(materialResponse.data);
 
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -231,9 +278,6 @@ const ForumDetail = () => {
           {/* List Materi */}
           <div className="bg-white p-4 rounded-md shadow-md flex-grow">
             <h3 className="text-xl font-semibold">List Materi</h3>
-            {user?.role === 'teacher' && (
-            <UploadMaterial forumId={forum.id} />
-            )}
             <p className="mt-2 text-gray-400">{forum.materi || 'Materi belum tersedia'}</p>
           </div>
         </div>
@@ -283,6 +327,59 @@ const ForumDetail = () => {
               </p>
             </div>
 
+          {/* List Materi */}
+          <div className="bg-white p-4 rounded-md shadow-md">
+              <h3 className="text-xl font-semibold mb-4">List Materi</h3>
+              {material.length === 0 ? (
+                <p className="text-gray-600 mt-4">Materi belum tersedia.</p>
+              ) : (
+                <ul className="space-y-4 mt-4">
+                  {material.map((item, index) => (
+                    <div key={item.id} className="border-b pb-4 mb-4 flex justify-between items-center">
+                      <div>
+                        <p className="text-lg font-medium">
+                          {index + 1}. {item.title}
+                        </p>
+                        <p className="mt-2 text-gray-600 whitespace-pre-line">{item.description}</p>
+                        <div className="mt-4">
+                          <h4 className="text-md font-semibold">Files:</h4>
+                          {item.files && item.files.length > 0 ? (
+                            <ul className="mt-2 space-y-2">
+                              {item.files.map((file, fileIndex) => (
+                                <li key={file.id}>
+                                  <span className="font-semibold">-</span>{' '}
+                                  <a
+                                    href={`${BASE_URL}/forum/files/${file.file_url}`}
+                                    download
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-orange-500 hover:underline"
+                                  >
+                                    {file.file_url}
+                                  </a>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <p className="text-sm text-gray-500">No files available</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* tombol hapus materi di kanan */}
+                      <motion.img
+                        src={Trash}
+                        alt="Delete Button"
+                        onClick={() => handleDeleteMaterial(item.id)}
+                        className="w-12 cursor-pointer bg-red-500 p-3 rounded-full shadow-md hover:bg-red-600 transition-all duration-300"
+                        whileHover={{ scale: 1.1 }}
+                      />
+                    </div>
+                  ))}
+                </ul>
+              )}
+          </div>
+
           {/* Recommended Forums */}
           <div className="bg-white p-4 rounded-md shadow-md max-w-screen-xl mx-auto overflow-hidden">
             <h3 className="text-xl font-semibold">Forum Lainnya</h3>
@@ -321,12 +418,14 @@ const ForumDetail = () => {
               )}
             </div>
           </div>
+
         </div>
       </div>
 
       {/* Edit Forum */}
-      {user?.role === 'teacher' && (
+      {user?.role === 'teacher' && (  
       <div className="flex justify-between items-center mt-auto">
+          <UploadMaterial forumId={forum.id} />
           <EditForum forumId={forum.id}/>
       </div>
       )}

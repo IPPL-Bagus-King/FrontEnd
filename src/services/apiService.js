@@ -271,3 +271,39 @@ export const uploadMaterial = async (forumId, formData, token) => {
     throw error;
   }
 };
+
+export const fetchMaterial = async (forumId) => {
+  const response = await fetch(`${BASE_URL}/forum/${forumId}/materials`, {
+      method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+  });
+
+  if (!response.ok) {
+      throw new Error('Failed to fetch materials');
+  }
+
+  return response.json();
+}
+
+export const deleteMaterial = async (materialId) => {
+  try {
+    const response = await fetch(`${BASE_URL}/forum/materials/${materialId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error('Gagal menghapus materi');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error deleting forum:', error);
+    throw error; // Re-throw the error to be handled in the component
+  }
+};

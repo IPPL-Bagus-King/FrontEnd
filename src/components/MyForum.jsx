@@ -93,7 +93,7 @@ const Forum = ({ forum }) => {
             <img 
               src={DetailKelas} 
               alt="Detail kelas Button" 
-              className="w-21 ml-1 transition-all duration-300 transform hover:scale-105 cursor-pointer"
+              className="w-21 ml-2 transition-all duration-300 transform hover:scale-105 cursor-pointer"
             />
           </Link>
         </div>

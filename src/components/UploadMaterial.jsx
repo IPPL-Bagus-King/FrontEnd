@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ModalForm from './ModalForm';
 import Upload from '../assets/UploadButton.png';
 import Swal from 'sweetalert2';
+import { motion } from 'framer-motion';
 import { uploadMaterial } from '../services/apiService';
 
 const UploadMaterial = ({ forumId }) => {
@@ -82,11 +83,12 @@ const UploadMaterial = ({ forumId }) => {
 
   return (
     <>
-      <img
+      <motion.img
         src={Upload}
         alt="Upload Button"
-        className="w-10 cursor-pointer bg-[#FFA726] p-2 rounded-full shadow-md hover:bg-[#FF9800] transition-all duration-300"
         onClick={() => setIsModalOpen(true)}
+        className="w-20 cursor-pointer fixed bottom-32 right-10 z-50 bg-[#FFA726] p-4 rounded-full shadow-md hover:bg-[#FF9800]"
+        whileHover={{ scale: 1.07 }}
       />
 
       {isModalOpen && (

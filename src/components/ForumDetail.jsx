@@ -281,10 +281,10 @@ const ForumDetail = () => {
           </div>
 
           {/* List Materi */}
-          <div className="bg-white p-4 rounded-md shadow-md flex-grow">
+          {/* <div className="bg-white p-4 rounded-md shadow-md flex-grow">
             <h3 className="text-xl font-semibold">List Materi</h3>
             <p className="mt-2 text-gray-400">{forum.materi || 'Materi belum tersedia'}</p>
-          </div>
+          </div> */}
         </div>
 
         {/* Right Column */}

@@ -91,6 +91,9 @@ const EditForum = ({ forumId }) => {
         onClick={handleOpenModal}
         className="w-20 cursor-pointer fixed bottom-10 right-10 z-50 bg-[#FFA726] p-4 rounded-full shadow-md hover:bg-[#FF9800]"
         whileHover={{ scale: 1.07 }}
+        style={{
+          width: '70px',
+        }}
       />
 
       {/* Modal Popup */}

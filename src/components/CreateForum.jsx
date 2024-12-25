@@ -69,7 +69,7 @@ const CreateForum = () => {
         src={LogoAdd}
         alt="Add Button"
         onClick={handleOpenModal}
-        style={{ width: '130px' }}
+        style={{ width: '110px' }}
         className="cursor-pointer fixed bottom-10 right-10 z-50 "
         whileHover={{ scale: 1.07 }}
         />

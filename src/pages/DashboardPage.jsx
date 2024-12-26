@@ -34,7 +34,7 @@ import {
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const DashboardPage = () => {
   const { user, setIsAuthenticated } = useContext(AuthContext);
-  const getDefaultMenu = (role) => { return role === 'teacher' ? 'forumTentor' : 'forumBelajar'; };
+  const getDefaultMenu = (role) => { return role === 'teacher' ? 'forumMentor' : 'forumBelajar'; };
   const [activeMenu, setActiveMenu] = useState(() => getDefaultMenu(user?.role)); // Default menu dashboard berdasarkan role
   const navigate = useNavigate(); // Untuk navigasi halaman
   
@@ -239,7 +239,7 @@ const DashboardPage = () => {
       };
       fetchPendingTeachersData();
     }
-    if (activeMenu === 'forumTentor') {
+    if (activeMenu === 'forumMentor') {
       const fetchTeacherForums = async () => {
         try {
           const token = localStorage.getItem('token');
@@ -314,7 +314,7 @@ const handleReject = async (teacherId) => {
               )}
             </div>
           );
-      case 'forumTentor':
+      case 'forumMentor':
         return (
           <div>
               {filteredTeacherForums.length === 0 ? (
@@ -400,7 +400,7 @@ const handleReject = async (teacherId) => {
           forum.name.toLowerCase().includes(searchQuery)
         ));
         break;
-      case 'forumTentor':
+      case 'forumMentor':
         setFilteredTeacherForums(teacherForums.filter((forum) =>
           forum.name.toLowerCase().includes(searchQuery)
         ));
@@ -484,12 +484,12 @@ const handleReject = async (teacherId) => {
           {user?.role === 'teacher' && (
           <button
             className={`w-full flex justify-center py-2 rounded-lg ${
-              activeMenu === 'forumTentor' ? 'bg-[#FFA726]' : 'bg-white'
+              activeMenu === 'forumMentor' ? 'bg-[#FFA726]' : 'bg-white'
             }`}
-            onClick={() => setActiveMenu('forumTentor')}
+            onClick={() => setActiveMenu('forumMentor')}
           >
             <img
-              src={activeMenu === 'forumTentor' ? ForumSayaAktif : ForumSayaInactive}
+              src={activeMenu === 'forumMentor' ? ForumSayaAktif : ForumSayaInactive}
               alt="Forum Saya Tentor"
               className="w-[80%] h-8 object-contain" // Ukuran lebih kecil
             />

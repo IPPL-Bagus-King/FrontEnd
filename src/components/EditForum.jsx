@@ -87,9 +87,9 @@ const EditForum = ({ forumId }) => {
       {/* Edit Button */}
       <motion.img
         src={Pencil}
-        alt="Edit Button"
+        alt='Edit Button'
         onClick={handleOpenModal}
-        className="w-20 cursor-pointer fixed bottom-10 right-10 z-50 bg-[#FFA726] p-4 rounded-full shadow-md hover:bg-[#FF9800]"
+        className='w-20 cursor-pointer fixed bottom-10 right-10 z-50 bg-[#FFA726] p-4 rounded-full shadow-md hover:bg-[#FF9800]'
         whileHover={{ scale: 1.07 }}
         style={{
           width: '70px',
@@ -97,63 +97,73 @@ const EditForum = ({ forumId }) => {
       />
 
       {/* Modal Popup */}
-      <Modal isOpen={isModalOpen} onClose={handleCloseModal} title="Edit Forum">
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal} title='Edit Forum'>
         <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          <div className='mb-4'>
+            <label
+              htmlFor='name'
+              className='block text-sm font-medium text-gray-700'
+            >
               Nama Forum
             </label>
             <input
-              type="text"
-              id="name"
-              name="name"
+              type='text'
+              id='name'
+              name='name'
               value={formData.name}
               onChange={handleChange}
-              placeholder="Nama Forum"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              placeholder='Nama Forum'
+              className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm'
               required
             />
           </div>
-          <div className="mb-4">
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+          <div className='mb-4'>
+            <label
+              htmlFor='description'
+              className='block text-sm font-medium text-gray-700'
+            >
               Deskripsi Forum
             </label>
             <textarea
-              id="description"
-              name="description"
+              id='description'
+              name='description'
               value={formData.description}
               onChange={handleChange}
-              placeholder="Deskripsi Forum"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              placeholder='Deskripsi Forum'
+              className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm'
               required
             />
           </div>
-          <div className="mb-4">
-            <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+          <div className='mb-4'>
+            <label
+              htmlFor='price'
+              className='block text-sm font-medium text-gray-700'
+            >
               Harga Forum
             </label>
             <input
-              type="number"
-              id="price"
-              name="price"
+              type='number'
+              id='price'
+              name='price'
+              min='1'
               value={formData.price}
               onChange={handleChange}
-              placeholder="Harga Forum"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              placeholder='Harga Forum'
+              className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm'
               required
             />
           </div>
-          {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
-          <div className="flex justify-end">
+          {error && <p className='text-red-500 text-sm mb-4'>{error}</p>}
+          <div className='flex justify-end'>
             <button
-              type="button"
+              type='button'
               onClick={handleCloseModal}
-              className="text-gray-500 hover:text-gray-700 transition duration-300 px-4 py-2"
+              className='text-gray-500 hover:text-gray-700 transition duration-300 px-4 py-2'
             >
               Batal
             </button>
             <button
-              type="submit"
+              type='submit'
               className={`${
                 loading ? 'bg-gray-400' : 'bg-[#ffa726]'
               } text-white hover:bg-[#ffb951] transition duration-300 px-4 py-2 rounded-md ml-2`}

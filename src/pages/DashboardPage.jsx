@@ -20,36 +20,44 @@ import TransaksiInactive from '../assets/Transaksi-Inactive.png'; // Logo Transa
 import KelolaMentorAktif from '../assets/KelolaMentor-Active.png'; // Logo KelolaMentor Aktif
 import KelolaMentorInactive from '../assets/KelolaMentor-Inactive.png'; // Logo KelolaMentor Inaktif
 import { AuthContext } from '../context/AuthContext';
-import { 
-  fetchForums, 
+import {
+  fetchForums,
   fetchForumsByTeacherId,
-  fetchTeacher, 
+  fetchTeacher,
   fetchRating,
-  approveTeacher, 
+  approveTeacher,
   rejectTeacher,
   fetchPendingTeachers,
-  fetchHistoryCheckoutbyForum
+  fetchHistoryCheckoutbyForum,
 } from '../services/apiService';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const DashboardPage = () => {
   const { user, setIsAuthenticated } = useContext(AuthContext);
-  const getDefaultMenu = (role) => { return role === 'teacher' ? 'forumMentor' : 'forumBelajar'; };
-  const [activeMenu, setActiveMenu] = useState(() => getDefaultMenu(user?.role)); // Default menu dashboard berdasarkan role
+  const getDefaultMenu = (role) => {
+    return role === 'teacher' ? 'forumMentor' : 'forumBelajar';
+  };
+  const [activeMenu, setActiveMenu] = useState(() =>
+    getDefaultMenu(user?.role)
+  ); // Default menu dashboard berdasarkan role
   const navigate = useNavigate(); // Untuk navigasi halaman
-  
+
   const [forums, setForum] = useState([]);
   const [teacherForums, setTeacherForums] = useState([]);
-  const [pendingTeachers, setPendingTeachers] = useState({data: []}); // State untuk data teacher pending
+  const [pendingTeachers, setPendingTeachers] = useState({ data: [] }); // State untuk data teacher pending
   const [historyCheckout, setHistoryCheckout] = useState([]);
   const [forumsHistory, setForumsHistory] = useState([]);
 
   const [filteredForums, setFilteredForums] = useState(forums);
-  const [filteredForumsHistory, setFilteredForumsHistory] = useState(forumsHistory);
-  const [filteredHistoryCheckout, setFilteredHistoryCheckout] = useState(historyCheckout);
-  const [filteredPendingTeachers, setFilteredPendingTeachers] = useState(pendingTeachers.data);
-  const [filteredTeacherForums, setFilteredTeacherForums] = useState(teacherForums);
-
+  const [filteredForumsHistory, setFilteredForumsHistory] =
+    useState(forumsHistory);
+  const [filteredHistoryCheckout, setFilteredHistoryCheckout] =
+    useState(historyCheckout);
+  const [filteredPendingTeachers, setFilteredPendingTeachers] = useState(
+    pendingTeachers.data
+  );
+  const [filteredTeacherForums, setFilteredTeacherForums] =
+    useState(teacherForums);
 
   // Fetch history checkout
   const fetchHistoryCheckout = async () => {
@@ -58,32 +66,35 @@ const DashboardPage = () => {
         const token = localStorage.getItem('token');
         const data = await fetchForumsByTeacherId(user?.id, token);
         const forumIds = data.map((forum) => forum.id);
-      
+
         // Loop semua forum ID untuk mendapatkan history checkout
         const historyCheckout = await Promise.all(
           forumIds.map(async (forumId) => {
             const response = await fetchHistoryCheckoutbyForum(forumId, token);
-            return response.data && response.data.length > 0 ? response.data : null;
+            return response.data && response.data.length > 0
+              ? response.data
+              : null;
           })
         );
-      
+
         // Gabungkan hasil dari semua forum dan filter nilai null
         const mergedHistoryCheckout = historyCheckout.filter(Boolean).flat();
-      
+
         // Tambahkan properti `name` ke setiap transaksi
-        const updatedHistoryCheckout = mergedHistoryCheckout.map((transaction) => ({
-          ...transaction,
-          name: transaction.forum.name, // Menambahkan properti name
-        }));
-      
+        const updatedHistoryCheckout = mergedHistoryCheckout.map(
+          (transaction) => ({
+            ...transaction,
+            name: transaction.forum.name, // Menambahkan properti name
+          })
+        );
+
         console.log(updatedHistoryCheckout); // Debug untuk memastikan hasil benar
-      
+
         // Set hasil akhir ke state
         setHistoryCheckout(updatedHistoryCheckout);
       } catch (error) {
         console.error('Error fetching history checkout:', error);
       }
-      
     } else {
       try {
         const response = await fetch(`${BASE_URL}/checkout/history`, {
@@ -95,7 +106,9 @@ const DashboardPage = () => {
         });
 
         if (!response.ok) {
-          throw new Error(`Failed to fetch checkout history: ${response.statusText}`);
+          throw new Error(
+            `Failed to fetch checkout history: ${response.statusText}`
+          );
         }
 
         const result = await response.json();
@@ -114,16 +127,19 @@ const DashboardPage = () => {
                 picture: forum.forum.picture,
                 teacher_name: teacherData.data.username,
                 teacher_picture: teacherData.data.picture,
-                rating: ratingData.averageRating || "N/A",
+                rating: ratingData.averageRating || 'N/A',
               };
             } catch (error) {
-              console.error(`Error enriching forum with id ${forum.id}:`, error);
+              console.error(
+                `Error enriching forum with id ${forum.id}:`,
+                error
+              );
               return forum;
             }
           })
         );
 
-        setHistoryCheckout(enrichedHistoryForums); 
+        setHistoryCheckout(enrichedHistoryForums);
         const forumHistory = await Promise.all(
           enrichedHistoryForums.map(async (forum) => {
             try {
@@ -131,7 +147,8 @@ const DashboardPage = () => {
                 return null;
               }
 
-              const response = await fetch(`${BASE_URL}/forum/${forum.id_forum}`,
+              const response = await fetch(
+                `${BASE_URL}/forum/${forum.id_forum}`,
                 {
                   method: 'GET',
                   headers: {
@@ -141,18 +158,25 @@ const DashboardPage = () => {
                 }
               );
               if (!response.ok) {
-                throw new Error(`Failed to fetch forum with id ${forum.id_forum}`);
+                throw new Error(
+                  `Failed to fetch forum with id ${forum.id_forum}`
+                );
               }
               const result = await response.json();
               return result.data;
             } catch (error) {
-              console.error(`Error fetching forum with id ${forum.id_forum}:`, error);
+              console.error(
+                `Error fetching forum with id ${forum.id_forum}:`,
+                error
+              );
               return null;
             }
           })
         );
-        
-        const filteredForumHistory = forumHistory.filter((forum) => forum !== null);
+
+        const filteredForumHistory = forumHistory.filter(
+          (forum) => forum !== null
+        );
 
         const enrichedForums = await Promise.all(
           filteredForumHistory.map(async (forum) => {
@@ -163,10 +187,13 @@ const DashboardPage = () => {
                 ...forum,
                 teacher_name: teacherData.data.username,
                 teacher_picture: teacherData.data.picture,
-                rating: ratingData.averageRating || "N/A",
+                rating: ratingData.averageRating || 'N/A',
               };
             } catch (error) {
-              console.error(`Error enriching forum with id ${forum.id}:`, error);
+              console.error(
+                `Error enriching forum with id ${forum.id}:`,
+                error
+              );
               return forum;
             }
           })
@@ -174,7 +201,7 @@ const DashboardPage = () => {
 
         setForumsHistory(enrichedForums);
       } catch (error) {
-        console.error("Error fetching history checkout:", error);
+        console.error('Error fetching history checkout:', error);
       }
     }
   };
@@ -193,7 +220,7 @@ const DashboardPage = () => {
               ...forum,
               teacher_name: teacherData.data.username,
               teacher_picture: teacherData.data.picture,
-              rating: ratingData.averageRating || "N/A",
+              rating: ratingData.averageRating || 'N/A',
             };
           } catch (error) {
             console.error(`Error enriching forum with id ${forum.id}:`, error);
@@ -204,7 +231,7 @@ const DashboardPage = () => {
 
       setForum(enrichedForums);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error('Error fetching data:', error);
     }
   };
 
@@ -217,7 +244,7 @@ const DashboardPage = () => {
     };
     fetchAllData();
   }, []);
- 
+
   const handleLogout = () => {
     localStorage.removeItem('token'); // Hapus token
     sessionStorage.removeItem('token');
@@ -230,11 +257,11 @@ const DashboardPage = () => {
     if (activeMenu === 'kelolaMentor') {
       const fetchPendingTeachersData = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const data = await fetchPendingTeachers(token);
-            setPendingTeachers(data);
+          const token = localStorage.getItem('token');
+          const data = await fetchPendingTeachers(token);
+          setPendingTeachers(data);
         } catch (error) {
-            console.error('Error:', error);
+          console.error('Error:', error);
         }
       };
       fetchPendingTeachersData();
@@ -243,7 +270,7 @@ const DashboardPage = () => {
       const fetchTeacherForums = async () => {
         try {
           const token = localStorage.getItem('token');
-          const data = await fetchForumsByTeacherId(user?.id, token);;
+          const data = await fetchForumsByTeacherId(user?.id, token);
           setTeacherForums(data); // Store the fetched forums
         } catch (error) {
           console.error('Error fetching forums:', error);
@@ -251,33 +278,33 @@ const DashboardPage = () => {
       };
       fetchTeacherForums();
     }
-}, [activeMenu, user?.id]); // Hanya fetch ulang jika activeMenu berubah
+  }, [activeMenu, user?.id]); // Hanya fetch ulang jika activeMenu berubah
 
-const handleApprove = async (teacherId) => {
-  try {
-    await approveTeacher(teacherId, localStorage.getItem('token'));
-    // Perbarui state untuk menghapus teacher yang sudah disetujui
-    setPendingTeachers((prev) => ({
-    ...prev,
-    data: prev.data.filter((teacher) => teacher.id !== teacherId),
-  }));
-  } catch (error) {
-    console.error('Error approving teacher:', error);
-  }
-};
+  const handleApprove = async (teacherId) => {
+    try {
+      await approveTeacher(teacherId, localStorage.getItem('token'));
+      // Perbarui state untuk menghapus teacher yang sudah disetujui
+      setPendingTeachers((prev) => ({
+        ...prev,
+        data: prev.data.filter((teacher) => teacher.id !== teacherId),
+      }));
+    } catch (error) {
+      console.error('Error approving teacher:', error);
+    }
+  };
 
-const handleReject = async (teacherId) => {
-  try {
-    await rejectTeacher(teacherId, localStorage.getItem('token'));
-    // Update state untuk menghapus teacher yang ditolak
-    setPendingTeachers((prev) => ({
-      ...prev,
-      data: prev.data.filter((teacher) => teacher.id !== teacherId),
-    }));
-  } catch (error) {
-    console.error('Error rejecting teacher:', error);
-  }
-};
+  const handleReject = async (teacherId) => {
+    try {
+      await rejectTeacher(teacherId, localStorage.getItem('token'));
+      // Update state untuk menghapus teacher yang ditolak
+      setPendingTeachers((prev) => ({
+        ...prev,
+        data: prev.data.filter((teacher) => teacher.id !== teacherId),
+      }));
+    } catch (error) {
+      console.error('Error rejecting teacher:', error);
+    }
+  };
 
   // Menentukan konten berdasarkan menu aktif
   const renderRightSectionContent = () => {
@@ -286,11 +313,11 @@ const handleReject = async (teacherId) => {
         return (
           <div>
             {filteredForums.length === 0 ? (
-              <div className="flex justify-center items-center h-full py-48">
-                <img src={NotFound} alt="Not Found" className="w-72" />
+              <div className='flex justify-center items-center h-full py-48'>
+                <img src={NotFound} alt='Not Found' className='w-72' />
               </div>
             ) : (
-              <div className="grid grid-cols-3 gap-6">
+              <div className='grid grid-cols-3 gap-6'>
                 {filteredForums.map((forum) => (
                   <Forum key={forum.id} forum={forum} />
                 ))}
@@ -298,274 +325,320 @@ const handleReject = async (teacherId) => {
             )}
           </div>
         );
-        case 'forumSaya':
-          return (
-            <div>
-              {filteredForumsHistory.length === 0 ? (
-                <div className="flex justify-center items-center h-full py-48">
-                  <img src={NotFound} alt="Not Found" className="w-72" />
-                </div>
-              ) : (
-                <div className="grid grid-cols-3 gap-6">
-                  {filteredForumsHistory.map((forum) => (
-                    <MyForum key={forum.id} forum={forum} />
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-      case 'forumMentor':
+      case 'forumSaya':
         return (
           <div>
-              {filteredTeacherForums.length === 0 ? (
-                <div className="flex justify-center items-center h-full py-48">
-                  <img src={NotFound} alt="Not Found" className="w-72" />
-                </div>
+            {filteredForumsHistory.length === 0 ? (
+              <div className='flex justify-center items-center h-full py-48'>
+                <img src={NotFound} alt='Not Found' className='w-72' />
+              </div>
             ) : (
-          <div className="grid grid-cols-3 gap-6">
-            {filteredTeacherForums.map((teacherForum) => (
-              <MyForum key={teacherForum.id} forum={teacherForum} />
-            ))}
-            <div className="flex justify-between items-center mt-auto">
-              <CreateForum />
-            </div>
-          </div>
+              <div className='grid grid-cols-3 gap-6'>
+                {filteredForumsHistory.map((forum) => (
+                  <MyForum key={forum.id} forum={forum} />
+                ))}
+              </div>
             )}
           </div>
         );
-        case 'transaksi':
-          return (
-            <div>
-              {filteredHistoryCheckout.length === 0 ? (
-                <div className="flex justify-center items-center h-full py-48">
-                  <img src={NotFound} alt="Not Found" className="w-72" />
-                </div>
-              ) : (
-                <div
-                  className={`grid ${user?.role === 'teacher' ? 'grid-cols-4' : 'grid-cols-3'} gap-6`}
-                >
-                  {filteredHistoryCheckout.slice().reverse().map((transaction) => (
+      case 'forumMentor':
+        return (
+          <div>
+            {filteredTeacherForums.length === 0 ? (
+              <div className='flex justify-center items-center h-full py-48'>
+                <img src={NotFound} alt='Not Found' className='w-72' />
+              </div>
+            ) : (
+              <div className='grid grid-cols-3 gap-6'>
+                {filteredTeacherForums.map((teacherForum) => (
+                  <MyForum key={teacherForum.id} forum={teacherForum} />
+                ))}
+              </div>
+            )}
+            <div className='flex justify-between items-center mt-auto'>
+              <CreateForum />
+            </div>
+          </div>
+        );
+      case 'transaksi':
+        return (
+          <div>
+            {filteredHistoryCheckout.length === 0 ? (
+              <div className='flex justify-center items-center h-full py-48'>
+                <img src={NotFound} alt='Not Found' className='w-72' />
+              </div>
+            ) : (
+              <div
+                className={`grid ${
+                  user?.role === 'teacher' ? 'grid-cols-4' : 'grid-cols-3'
+                } gap-6`}
+              >
+                {filteredHistoryCheckout
+                  .slice()
+                  .reverse()
+                  .map((transaction) =>
                     user?.role === 'teacher' ? (
-                      <HistoryCheckoutTeacher key={transaction.id} forum={transaction} />
+                      <HistoryCheckoutTeacher
+                        key={transaction.id}
+                        forum={transaction}
+                      />
                     ) : (
-                      <HistoryCheckout key={transaction.id} forum={transaction} />
+                      <HistoryCheckout
+                        key={transaction.id}
+                        forum={transaction}
+                      />
                     )
-                  ))}
-                </div>
-              )}
-            </div>
-          );          
-        case 'kelolaMentor':
-          return (
-            <div>
-              {filteredPendingTeachers.length === 0 ? (
-                <div className="flex justify-center items-center h-full text-gray-600">
-                  <p>Tidak ada mentor yang menunggu persetujuan.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-4 gap-6">
-                  {filteredPendingTeachers.map((teacher) => (
-                    <KelolaMentor
-                      key={teacher.id}
-                      teacher={teacher}
-                      onApprove={() => handleApprove(teacher.id)}
-                      onReject={() => handleReject(teacher.id)}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          );
-          default:
+                  )}
+              </div>
+            )}
+          </div>
+        );
+      case 'kelolaMentor':
+        return (
+          <div>
+            {filteredPendingTeachers.length === 0 ? (
+              <div className='flex justify-center items-center h-full text-gray-600'>
+                <p>Tidak ada mentor yang menunggu persetujuan.</p>
+              </div>
+            ) : (
+              <div className='grid grid-cols-4 gap-6'>
+                {filteredPendingTeachers.map((teacher) => (
+                  <KelolaMentor
+                    key={teacher.id}
+                    teacher={teacher}
+                    onApprove={() => handleApprove(teacher.id)}
+                    onReject={() => handleReject(teacher.id)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      default:
         return null;
     }
   };
-  
 
   // Handle Search
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
     const searchQuery = event.target.value.toLowerCase();
-  
+
     switch (activeMenu) {
       case 'forumBelajar':
-        setFilteredForums(forums.filter((forum) =>
-          forum.name.toLowerCase().includes(searchQuery)
-        ));
+        setFilteredForums(
+          forums.filter((forum) =>
+            forum.name.toLowerCase().includes(searchQuery)
+          )
+        );
         break;
       case 'forumSaya':
-        setFilteredForumsHistory(forumsHistory.filter((forum) =>
-          forum.name.toLowerCase().includes(searchQuery)
-        ));
+        setFilteredForumsHistory(
+          forumsHistory.filter((forum) =>
+            forum.name.toLowerCase().includes(searchQuery)
+          )
+        );
         break;
       case 'forumMentor':
-        setFilteredTeacherForums(teacherForums.filter((forum) =>
-          forum.name.toLowerCase().includes(searchQuery)
-        ));
+        setFilteredTeacherForums(
+          teacherForums.filter((forum) =>
+            forum.name.toLowerCase().includes(searchQuery)
+          )
+        );
         break;
       case 'transaksi':
-        setFilteredHistoryCheckout(historyCheckout.filter((transaction) =>
-          transaction.name.toLowerCase().includes(searchQuery)
-        ));
-          
+        setFilteredHistoryCheckout(
+          historyCheckout.filter((transaction) =>
+            transaction.name.toLowerCase().includes(searchQuery)
+          )
+        );
+
         break;
       case 'kelolaMentor':
-        setFilteredPendingTeachers(pendingTeachers.data.filter((teacher) =>
-          teacher.name.toLowerCase().includes(searchQuery)
-        ));
+        setFilteredPendingTeachers(
+          pendingTeachers.data.filter((teacher) =>
+            teacher.name.toLowerCase().includes(searchQuery)
+          )
+        );
         break;
       default:
         break;
     }
   };
-  
+
   useEffect(() => {
     setFilteredForums(forums);
     setFilteredForumsHistory(forumsHistory);
     setFilteredHistoryCheckout(historyCheckout);
     setFilteredPendingTeachers(pendingTeachers.data);
-    setFilteredTeacherForums(teacherForums)
+    setFilteredTeacherForums(teacherForums);
   }, [forums, forumsHistory, historyCheckout, pendingTeachers, teacherForums]);
-  
+
   return (
-    <div className="flex min-h-screen">
+    <div className='flex min-h-screen'>
       {/* Sidebar */}
       <div
-        className="w-[18%] bg-white relative border-r border-[#FFA726] flex flex-col items-center py-6 space-y-6"
-        style={{ height: '100vh', position: 'sticky', top: 0  }}
+        className='w-[18%] bg-white relative border-r border-[#FFA726] flex flex-col items-center py-6 space-y-6'
+        style={{ height: '100vh', position: 'sticky', top: 0 }}
       >
         {/* Logo */}
-        <img src={LogoOrange} alt="Logo Orange" className="w-28" />
+        <img src={LogoOrange} alt='Logo Orange' className='w-28' />
 
         {/* Profile */}
-        <div className="flex flex-col items-center space-y-2">
-          <img src={`${BASE_URL}/${user.picture}`} alt="Profile" className="w-16 h-16 rounded-full mt-4" />
-          <h2 className="text-lg font-semibold text-center">{user.name}</h2>
-          <p className="text-gray-500 text-sm text-center">{user.role}</p>
+        <div className='flex flex-col items-center space-y-2'>
+          <img
+            src={`${BASE_URL}/${user.picture}`}
+            alt='Profile'
+            className='w-16 h-16 rounded-full mt-4'
+          />
+          <h2 className='text-lg font-semibold text-center'>{user.name}</h2>
+          <p className='text-gray-500 text-sm text-center'>{user.role}</p>
         </div>
 
         {/* Menu */}
-        <div className="w-full px-4 space-y-4 flex-grow">
-
+        <div className='w-full px-4 space-y-4 flex-grow'>
           {/* Forum Belajar */}
           {user?.role !== 'teacher' && (
-          <button
-            className={`w-full flex justify-center py-2 rounded-lg ${
-              activeMenu === 'forumBelajar' ? 'bg-[#FFA726]' : 'bg-white'
-            }`}
-            onClick={() => setActiveMenu('forumBelajar')}
-          >
-            <img
-              src={activeMenu === 'forumBelajar' ? ForumBelajarAktif : ForumBelajarInactive}
-              alt="Forum Belajar"
-              className="w-[80%] h-8 object-contain" // Ukuran lebih kecil
-            />
-          </button>
+            <button
+              className={`w-full flex justify-center py-2 rounded-lg ${
+                activeMenu === 'forumBelajar' ? 'bg-[#FFA726]' : 'bg-white'
+              }`}
+              onClick={() => setActiveMenu('forumBelajar')}
+            >
+              <img
+                src={
+                  activeMenu === 'forumBelajar'
+                    ? ForumBelajarAktif
+                    : ForumBelajarInactive
+                }
+                alt='Forum Belajar'
+                className='w-[80%] h-8 object-contain' // Ukuran lebih kecil
+              />
+            </button>
           )}
           {/* Forum Saya */}
           {user?.role === 'student' && (
-          <button
-            className={`w-full flex justify-center py-2 rounded-lg ${
-              activeMenu === 'forumSaya' ? 'bg-[#FFA726]' : 'bg-white'
-            }`}
-            onClick={() => setActiveMenu('forumSaya')}
-          >
-            <img
-              src={activeMenu === 'forumSaya' ? ForumSayaAktif : ForumSayaInactive}
-              alt="Forum Saya"
-              className="w-[80%] h-8 object-contain" // Ukuran lebih kecil
-            />
-          </button>
+            <button
+              className={`w-full flex justify-center py-2 rounded-lg ${
+                activeMenu === 'forumSaya' ? 'bg-[#FFA726]' : 'bg-white'
+              }`}
+              onClick={() => setActiveMenu('forumSaya')}
+            >
+              <img
+                src={
+                  activeMenu === 'forumSaya'
+                    ? ForumSayaAktif
+                    : ForumSayaInactive
+                }
+                alt='Forum Saya'
+                className='w-[80%] h-8 object-contain' // Ukuran lebih kecil
+              />
+            </button>
           )}
 
           {/* Forum Saya Tentor*/}
           {user?.role === 'teacher' && (
-          <button
-            className={`w-full flex justify-center py-2 rounded-lg ${
-              activeMenu === 'forumMentor' ? 'bg-[#FFA726]' : 'bg-white'
-            }`}
-            onClick={() => setActiveMenu('forumMentor')}
-          >
-            <img
-              src={activeMenu === 'forumMentor' ? ForumSayaAktif : ForumSayaInactive}
-              alt="Forum Saya Tentor"
-              className="w-[80%] h-8 object-contain" // Ukuran lebih kecil
-            />
-          </button>
+            <button
+              className={`w-full flex justify-center py-2 rounded-lg ${
+                activeMenu === 'forumMentor' ? 'bg-[#FFA726]' : 'bg-white'
+              }`}
+              onClick={() => setActiveMenu('forumMentor')}
+            >
+              <img
+                src={
+                  activeMenu === 'forumMentor'
+                    ? ForumSayaAktif
+                    : ForumSayaInactive
+                }
+                alt='Forum Saya Tentor'
+                className='w-[80%] h-8 object-contain' // Ukuran lebih kecil
+              />
+            </button>
           )}
 
           {/* Transaksi */}
           {user?.role !== 'admin' && (
-          <button
-            className={`w-full flex justify-center py-2 rounded-lg ${
-              activeMenu === 'transaksi' ? 'bg-[#FFA726]' : 'bg-white'
-            }`}
-            onClick={() => setActiveMenu('transaksi')}
-          >
-            <img
-              src={activeMenu === 'transaksi' ? TransaksiAktif : TransaksiInactive}
-              alt="Transaksi"
-              className="w-[80%] h-8 object-contain" // Ukuran lebih kecil
-            />
-          </button>
+            <button
+              className={`w-full flex justify-center py-2 rounded-lg ${
+                activeMenu === 'transaksi' ? 'bg-[#FFA726]' : 'bg-white'
+              }`}
+              onClick={() => setActiveMenu('transaksi')}
+            >
+              <img
+                src={
+                  activeMenu === 'transaksi'
+                    ? TransaksiAktif
+                    : TransaksiInactive
+                }
+                alt='Transaksi'
+                className='w-[80%] h-8 object-contain' // Ukuran lebih kecil
+              />
+            </button>
           )}
 
           {/* Kelola Mentor */}
           {user?.role === 'admin' && (
-          <button
-            className={`w-full flex justify-center py-2 rounded-lg ${
-              activeMenu === 'kelolaMentor' ? 'bg-[#FFA726]' : 'bg-white'
-            }`}
-            onClick={() => setActiveMenu('kelolaMentor')}
-          >
-            <img
-              src={activeMenu === 'kelolaMentor' ? KelolaMentorAktif : KelolaMentorInactive}
-              alt="Kelola Mentor"
-              className="w-[80%] h-8 object-contain" // Ukuran lebih kecil
-            />
-          </button>
+            <button
+              className={`w-full flex justify-center py-2 rounded-lg ${
+                activeMenu === 'kelolaMentor' ? 'bg-[#FFA726]' : 'bg-white'
+              }`}
+              onClick={() => setActiveMenu('kelolaMentor')}
+            >
+              <img
+                src={
+                  activeMenu === 'kelolaMentor'
+                    ? KelolaMentorAktif
+                    : KelolaMentorInactive
+                }
+                alt='Kelola Mentor'
+                className='w-[80%] h-8 object-contain' // Ukuran lebih kecil
+              />
+            </button>
           )}
         </div>
 
         {/* Sign Out */}
         <button
-          className="w-full flex justify-center py-2 mt-auto rounded-lg"
+          className='w-full flex justify-center py-2 mt-auto rounded-lg'
           onClick={handleLogout} // Navigasi ke landing page
         >
-          <img src={SignOutIcon} alt="Sign Out" className="w-[35%] h-auto" />
+          <img src={SignOutIcon} alt='Sign Out' className='w-[35%] h-auto' />
         </button>
       </div>
 
       {/* Right Section */}
-      <div className="flex-1 bg-white p-8">
+      <div className='flex-1 bg-white p-8'>
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-semibold capitalize text-[#FFA726]">
-            {activeMenu.replace('forum', 'Forum ').replace('transaksi', 'Transaksi').replace('kelola', 'Kelola ')}
+        <div className='flex justify-between items-center mb-6'>
+          <h1 className='text-3xl font-semibold capitalize text-[#FFA726]'>
+            {activeMenu
+              .replace('forum', 'Forum ')
+              .replace('transaksi', 'Transaksi')
+              .replace('kelola', 'Kelola ')}
           </h1>
-          
+
           {/* Search Section */}
-          <div className="flex items-center relative">
-            <img 
-              src={Filter} 
-              alt="Filer Icon" 
-              className="w-11 h-11 mr-2" 
-              />
+          <div className='flex items-center relative'>
+            <img src={Filter} alt='Filer Icon' className='w-11 h-11 mr-2' />
             <input
-              type="text"
-              placeholder="Search..."
-              className="w-72 pl-10 px-2 py-3 rounded-3xl border border-[#ffa726] focus:outline-none focus:ring-2 focus:ring-[#ffe4bc] transition-all duration-200 ease-in-out shadow-sm"
+              type='text'
+              placeholder='Search...'
+              className='w-72 pl-10 px-2 py-3 rounded-3xl border border-[#ffa726] focus:outline-none focus:ring-2 focus:ring-[#ffe4bc] transition-all duration-200 ease-in-out shadow-sm'
               value={searchTerm}
               onChange={handleSearch}
-              onKeyDown={(e)=>{
-                if(e.key === 'Enter'){
-                  handleSearch(e)
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSearch(e);
                 }
               }}
             />
-            <img src={Search} alt="Search Icon" className="absolute left-16 top-1/2 transform -translate-y-1/2 w-5 h-5" />
+            <img
+              src={Search}
+              alt='Search Icon'
+              className='absolute left-16 top-1/2 transform -translate-y-1/2 w-5 h-5'
+            />
           </div>
 
           {/* <div className="flex items-center bg-[#F7F7F7] px-4 py-2 rounded-md">
@@ -580,7 +653,6 @@ const handleReject = async (teacherId) => {
 
         {/* Render Konten berdasarkan Menu */}
         {renderRightSectionContent()}
-        
       </div>
     </div>
   );
